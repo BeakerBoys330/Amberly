@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# Calibration photos (CC BY 4.0, re-download from Roboflow; see tools/calibrate.js)
+tools/dataset/
+# Supabase keys for local development (set the same values in Vercel)
+.env.local
