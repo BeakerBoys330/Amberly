@@ -22,7 +22,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 ## Files
 | File | Role |
 |---|---|
-| `src/Amberly.jsx` | Main app: welcome → strain select → Effect Dial + capture → analysis → diary. Also always-share toggle, diary screen, About modal. Holds the design-system CSS (`STYLES`, `tv-*` classes). |
+| `src/Amberly.jsx` | Main app: welcome → strain select → Effect Dial + capture → analysis → diary. Also diary screen, share sheet hookup, About modal (account, delete data). Holds the design-system CSS (`STYLES`, `tv-*` classes). |
 | `src/GrowPlanner.jsx` | Planner UI: grow list, setup form, Today card, quick-log, 21-day strip, targets, timeline, photos, history. Reuses `tv-*` classes; extra `gp-*` CSS in `GP_STYLES`. |
 | `src/planner.js` | Pure logic + research data, no React: `STAGES` table, `plan()`, `waterPlan()`, `feedPlan()`, `envCheck()` (VPD), `lightCheck()`, `flipHeight()`, `scanForecast()`, date helpers, `store`. |
 | `src/strain-database.json` | Starter strain list (27, curated), bundled into the app (works offline). Facts only — no third-party image links. |
@@ -33,7 +33,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 | `src/ShareSheet.jsx` | Sign-in (email code) + share-consent sheet; `useCloudUser()` hook. |
 | `supabase/schema.sql` | Table, photo bucket, Row Level Security, account-deletion function. Run once in Supabase. |
 | `src/Social.jsx` | Following: feed (followed people only, newest first), profiles, username search, invite links (`?u=`), followers/requests/blocks, emoji reactions, report/block. |
-| `supabase/rules-check.mjs` | 42 end-to-end checks of the database rules against a local Supabase (Docker). Re-run after any schema change. |
+| `supabase/rules-check.mjs` | 45 end-to-end checks of the database rules (including blocked attacks) against a local Supabase (Docker). Re-run after any schema change. |
 | `docs/SETUP.md` | GitHub → Supabase → Vercel steps, training-data rule, daily report review. |
 | `vercel.json` | Security headers (CSP etc.) for hosting; `npm run preview` applies the same headers locally. |
 | `tests/` | `npm test` (Node's built-in runner, no extra packages). |
@@ -45,7 +45,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 - **Local-first, account optional.** Everything works with no account and no network. Sign-in (email + 6-digit code, no password) is only for sharing now, and later for backup/multi-device sync. Without `VITE_SUPABASE_*` env vars, all cloud UI is hidden.
 - **Sharing & following:** every shared reading/grow has two separate switches — `visible_to_followers` and `for_training` (training data = `for_training` rows ONLY). Profiles default to approve-each-follower; users can go public. The feed shows ONLY people you follow (approved), newest first: no ranking, no suggestions, public profiles never pushed into feeds. Followers react with 4 fixed emoji; no comments/DMs. Report + block everywhere (Apple 1.2). RLS in `supabase/schema.sql` enforces all of it (helper functions live in the unexposed `private` schema; post photo paths must be in the poster's own folder; daily flood limits on posts, photos, follows, reports); `rules-check.mjs` proves it, including the attacks found in the Oct 2026 review. Photos re-encoded via canvas before upload (strips EXIF/GPS); grow nicknames never upload; stop sharing / deleting an item / deleting the account removes the server copy. Setup: `docs/SETUP.md`.
 - **Records are "social-ready":** every grow, log, and diary entry has `id`, ISO timestamp, `author: null`, `shared: false`. Keep this shape — it's what a future community feed syncs.
-- Keys: `amberly.prefs.v1` (alwaysShare), `amberly.diary.v1` (scans, max 200, newest first), `amberly.grows.v1` (grows with embedded `logs[]`). Bump the `v` suffix and migrate if a shape changes.
+- Keys: `amberly.diary.v1` (scans, max 200, newest first), `amberly.grows.v1` (grows with embedded `logs[]`), `amberly.consent.v1` (legal acceptance + version), `amberly.auth.v1` (Supabase session, only if signed in). `amberly.prefs.v1` is a retired "always share" setting, only deleted now. Bump the `v` suffix and migrate if a shape changes.
 - Diary entries carry `growId` when a scan is launched from a grow → `scanForecast()` projects harvest date from amber trend.
 - **Dates:** grows store `YYYY-MM-DD` strings; always use `parseDay`/`addDays`/`daysBetween` (local-time, DST-safe via `setDate`). Never add `n * 86400000` — that shifted dates a day across the Nov DST change (real bug, fixed).
 - **Photos:** `decodeFile()` in Amberly: 10 MB cap, non-image rejection, friendly HEIC message where the browser can't decode it (Safari decodes HEIC natively; iOS hands `accept="image/*"` inputs a JPEG). No converter library. Reuse it for any new photo input. Diary thumbs 160px, grow photos 480px JPEG data URLs.
@@ -54,9 +54,9 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 - No `alert()`; use inline UI/toasts. `window.confirm` only for destructive deletes.
 
 ## Trichome analysis (rule-based, on-device)
-- Pixels → HSL. **Pistil exclusion is the headline correctness rule:** orange/brown hairs are NOT amber trichomes. Separator is saturation: pistils `H 6–40, S > 40, L 30–82` → ignored. Amber trichomes are muted gold `H 28–58, S 8–38, L 30–66`.
+- Pixels → HSL. **Pistil exclusion is the headline correctness rule:** orange/brown hairs are NOT amber trichomes. Pistils `H 6–40, S > 40, L 30–82` → ignored. Amber: `H 20–62, S 32–55, L 30–80`. Pixels with `S ≥ 42` that aren't amber are ignored.
 - Also ignores green plant matter (`H 70–160, S > 18`) and blown-out/black pixels.
-- Clear: `L ≥ 72, S < 28`. Cloudy: `48 ≤ L < 72, S < 28`.
+- Clear (see-through, so it reads darker than milky): `50 ≤ L < 61`. Cloudy/milky: `L ≥ 61`. Thresholds were tuned against ~3,500 labeled heads with `tools/calibrate.html` (Roboflow CC BY 4.0 sets; download them into `tools/dataset/`); re-run it after changing them. Color alone separates clear from milky only weakly — a trained model is the real fix.
 - Images downscaled to 480px wide; every 4th pixel sampled. Multiple photos are averaged (`combineSamples`); low coverage (< 4% classifiable) shows a "reading may be off" warning.
 - **Effect Dial** (`EFFECT_PROFILES` in Amberly.jsx, `AMBER_TARGET` in planner.js — keep in sync):
   - Energetic: 1–10% amber (ideal 5)
@@ -88,20 +88,19 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 ## Privacy & policy decisions
 - Everything on-device. Analysis always works without sharing.
 - Sharing is opt-in per reading or per grow, never automatic, and needs an account (email code, no password). A shared grow keeps sending new entries until both switches are off. Consent text: `ShareSheet.jsx`, Terms §7 (follower display + separate training license) and §8 (community rules, 24-hour report review).
-- No accounts yet. Future accounts: optional, minimal (no name), 21+ attestation + country/state; must include in-app account deletion (Apple 5.1.1(v)).
+- Accounts are optional and minimal (email + 6-digit code, no password, no name); 21+ is attested at first launch and stored with sign-up. In-app account deletion exists (About → Account; Apple 5.1.1(v)).
 - **No client-side admin passwords** (removed — fake security). Admin actions belong behind real backend auth.
 - **Never** add buying, selling, ordering, delivery, or shop links for cannabis — banned by Apple 1.4.3 and Google Play regardless of legality. Store copy stays about plant care.
 - Local-law notice shown on setup. Expect adults-only store rating.
-- Data sourcing: do **not** scrape Leafly, Seedfinder, or GrowDiaries (ToS). Use public Kaggle Leafly datasets, the public GitHub image repo `linhacanabica/images-strains-weed` (mixed real/illustrative images), and breeder lists.
+- Data sourcing: do **not** scrape Leafly, Seedfinder, or GrowDiaries (ToS). Strain facts may be re-entered from breeder sites (facts aren't copyrightable; descriptions and photos are). Do not use the `linhacanabica/images-strains-weed` images (partly Leafly's, conflicting license) or the Cannabis Intelligence Database (paid license for apps).
 
 ## Known limitations / next tasks
 1. localStorage caps ~5 MB (~50–100 grow photos). App toasts when full. Next: Capacitor Filesystem.
 2. Reminder notifications (Capacitor Local Notifications) — top competitor-loved feature.
-3. 21+ gate on first launch; privacy policy page.
-4. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
-5. Backend: sharing is built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared), then a community feed (needs public handles + moderation).
-6. Strain DB: run the Kaggle merge to grow from 27 to ~2,500; tag type, auto/photo, breeder, flower time.
-7. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
+3. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
+4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). Before launch: pin `connect-src`/`img-src` in `vercel.json` to the real Supabase project URL, and turn on Supabase CAPTCHA.
+5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list.
+6. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
 
 ## Verification
 - `npm test` must pass. It covers these planner sanity checks: auto standard harvest = day 77; photo hybrid 4-wk veg harvest = day 105; 75 °F / 55% RH → VPD ≈ 1.0 kPa; 480 W in 4×4 = 30 W/sq ft; 72" tent, 5 gal, hybrid → flip at 15".

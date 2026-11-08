@@ -20,6 +20,18 @@ test("a real flip date re-times the harvest", () => {
   assert.equal(harvestDay(grow({ plantType: "photo", genetics: "hybrid", vegWeeks: 4, flipDate: "2026-07-01" })), 30 + 63);
 });
 
+test("a nonsense 'days from seed' (0, negative, huge) falls back to the speed choice", () => {
+  for (const breederDays of [0, -5, 5000, "abc"]) {
+    assert.equal(harvestDay(grow({ plantType: "auto", autoSpeed: "standard", breederDays })), 77);
+  }
+  assert.equal(harvestDay(grow({ plantType: "auto", breederDays: 70 })), 70);
+});
+
+test("negative watts or tent size give no light check instead of a negative number", () => {
+  assert.equal(lightCheck({ tentW: 4, tentL: 4, lightWatts: -480 }), null);
+  assert.equal(lightCheck({ tentW: -4, tentL: 4, lightWatts: 480 }), null);
+});
+
 test("75°F / 55% RH gives leaf VPD ≈ 1.0 kPa", () => {
   assert.ok(Math.abs(envCheck("lateVeg", 75, 55).vpd - 1.0) < 0.1);
 });

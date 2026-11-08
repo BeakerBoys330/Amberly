@@ -40,6 +40,7 @@ const GP_STYLES = `
   .gp-issue.ok { background: #f0f5ee; color: #5e7d52; }
   .gp-label { font-size: 13px; font-weight: 600; color: #5c5249; margin: 16px 0 7px; }
   .gp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .gp-toast button { background: none; border: none; color: #f2c37a; font-weight: 700; font-size: 14px; margin-left: 14px; cursor: pointer; padding: 0; }
   .gp-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #2b2622; color: #fff;
     padding: 12px 20px; border-radius: 99px; font-size: 14px; z-index: 60; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
 `;
@@ -63,6 +64,8 @@ const Card = ({ title, children }) => (
 
 const Row = ({ k, v }) => <div className="gp-row"><span>{k}</span><b>{v}</b></div>;
 const range = (r, unit = "") => (r ? `${r[0]}–${r[1]}${unit}` : "—");
+// Typed readings must be real numbers in a believable range (e.g. humidity 1–100%, pH 0–14).
+const inRange = (v, lo, hi) => v !== "" && Number.isFinite(+v) && +v >= lo && +v <= hi;
 
 export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack, fileToThumb }) {
   const [grows, setGrows] = useState(() => { const g = store.get(GROWS_KEY, []); return Array.isArray(g) ? g : []; });
@@ -80,12 +83,20 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
     setGrows(next);
     if (!store.set(GROWS_KEY, next)) setToast("Storage full — delete old photos to keep saving");
   }, []);
-  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 2400); return () => clearTimeout(t); }, [toast]);
+  // toast: a message, or { msg, undo } — Undo toasts stay up a little longer.
+  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), toast.undo ? 6000 : 2400); return () => clearTimeout(t); }, [toast]);
 
   const grow = grows.find((g) => g.id === view.id);
   const patchGrow = (id, fn) => save(growsRef.current.map((g) => (g.id === id ? { ...g, ...fn(g) } : g)));
   const updateGrow = (patch) => patchGrow(grow.id, () => patch);
-  const addLog = (type, fields, msg) => { updateGrow({ logs: [...grow.logs, makeLog(type, fields)] }); setToast(msg); setSheet(null); };
+  // Build on the latest logs (not this render's copy): a photo can finish loading after an upload changed them.
+  const addLog = (type, fields, msg) => { patchGrow(grow.id, (cur) => ({ logs: [...cur.logs, makeLog(type, fields)] })); setToast(msg); setSheet(null); };
+  // "I flipped" / "first pistils" / "I harvested": one tap, with Undo in case of a mis-tap.
+  const markToday = (field, msg) => {
+    const id = grow.id;
+    patchGrow(id, () => ({ [field]: toDayStr(Date.now()) }));
+    setToast({ msg, undo: () => { patchGrow(id, () => ({ [field]: "" })); setToast(""); } });
+  };
 
   // ── Sharing a grow journey (opt-in): followers and/or training, chosen separately ──
   // Upload the grow and any entries not sent yet, then mark those entries synced.
@@ -120,7 +131,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   };
   // While a grow is shared, quietly send new entries and key dates — now, and again
   // whenever the phone gets its connection back.
-  const pending = grow?.shared ? `${grow.logs.filter((l) => !l.synced).length}|${grow.flipDate}|${grow.harvestDate}` : null;
+  const pending = grow?.shared ? `${grow.logs.filter((l) => !l.synced).length}|${grow.flipDate}|${grow.harvestDate}|${grow.editedAt}` : null;
   useEffect(() => {
     if (!cloudEnabled || !pending) return;
     const send = () => pushGrow(growsRef.current.find((g) => g.id === grow.id)).catch(() => {});
@@ -147,8 +158,16 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   if (view.mode === "edit" && draft) {
     const auto = draft.plantType === "auto", indoor = draft.location === "indoor";
     const commit = () => {
-      const g = { ...draft, name: draft.name.trim() || draft.strainName.trim() || "My grow" };
-      save(grows.some((x) => x.id === g.id) ? grows.map((x) => (x.id === g.id ? g : x)) : [g, ...grows]);
+      const g = {
+        ...draft,
+        name: draft.name.trim() || draft.strainName.trim() || "My grow",
+        startDate: draft.startDate || toDayStr(Date.now()), // a cleared date box would break the whole plan
+        editedAt: new Date().toISOString(),                  // lets a shared grow send the new setup
+      };
+      // Editing only changes the setup: keep the latest logs and sharing state.
+      save(grows.some((x) => x.id === g.id)
+        ? grows.map((x) => (x.id === g.id ? { ...g, logs: x.logs, shared: x.shared, sharing: x.sharing } : x))
+        : [g, ...grows]);
       setView({ mode: "detail", id: g.id });
     };
     return (
@@ -278,18 +297,20 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         {sheet && (
           <Card title={{ feed: "🧪 Log a feeding", env: "🌡️ Climate check", note: "✏️ Add a note" }[sheet.type]}>
             {sheet.type === "feed" && <div className="gp-two" style={{ marginBottom: 10 }}>
-              <input className="tv-input" type="number" step="0.1" inputMode="decimal" placeholder="EC (optional)" value={sheet.ec} onChange={(e) => setSheet({ ...sheet, ec: e.target.value })} />
-              <input className="tv-input" type="number" step="0.1" inputMode="decimal" placeholder="pH (optional)" value={sheet.ph} onChange={(e) => setSheet({ ...sheet, ph: e.target.value })} />
+              <input className="tv-input" type="number" step="0.1" inputMode="decimal" min="0" max="10" placeholder="EC (optional)" value={sheet.ec} onChange={(e) => setSheet({ ...sheet, ec: e.target.value })} />
+              <input className="tv-input" type="number" step="0.1" inputMode="decimal" min="0" max="14" placeholder="pH (optional)" value={sheet.ph} onChange={(e) => setSheet({ ...sheet, ph: e.target.value })} />
             </div>}
             {sheet.type === "env" && <div className="gp-two" style={{ marginBottom: 10 }}>
-              <input className="tv-input" type="number" inputMode="decimal" placeholder="Temp °F" value={sheet.temp} onChange={(e) => setSheet({ ...sheet, temp: e.target.value })} />
-              <input className="tv-input" type="number" inputMode="decimal" placeholder="Humidity %" value={sheet.rh} onChange={(e) => setSheet({ ...sheet, rh: e.target.value })} />
+              <input className="tv-input" type="number" inputMode="decimal" min="30" max="120" placeholder="Temp °F" value={sheet.temp} onChange={(e) => setSheet({ ...sheet, temp: e.target.value })} />
+              <input className="tv-input" type="number" inputMode="decimal" min="1" max="100" placeholder="Humidity %" value={sheet.rh} onChange={(e) => setSheet({ ...sheet, rh: e.target.value })} />
             </div>}
             {sheet.type !== "env" && <textarea className="tv-textarea" placeholder={sheet.type === "feed" ? "What did you feed? (e.g. Big Bloom 3 tsp/gal)" : "What's happening?"} value={sheet.note} onChange={(e) => setSheet({ ...sheet, note: e.target.value })} style={{ marginBottom: 10 }} />}
             <div className="tv-btn-row" style={{ marginTop: 0 }}>
               <button className="tv-btn tv-btn-soft" onClick={() => setSheet(null)}>Cancel</button>
               <button className="tv-btn tv-btn-primary"
-                disabled={(sheet.type === "env" && (!sheet.temp || !sheet.rh)) || (sheet.type === "note" && !sheet.note.trim())}
+                disabled={(sheet.type === "env" && !(inRange(sheet.temp, 30, 120) && inRange(sheet.rh, 1, 100)))
+                  || (sheet.type === "feed" && ((sheet.ec !== "" && !inRange(sheet.ec, 0, 10)) || (sheet.ph !== "" && !inRange(sheet.ph, 0, 14))))
+                  || (sheet.type === "note" && !sheet.note.trim())}
                 onClick={() => {
                   if (sheet.type === "feed") addLog("feed", { ec: sheet.ec ? +sheet.ec : null, ph: sheet.ph ? +sheet.ph : null, note: sheet.note.trim() }, "🧪 Feeding logged");
                   if (sheet.type === "env") addLog("env", { temp: +sheet.temp, rh: +sheet.rh }, "🌡️ Climate saved");
@@ -301,14 +322,14 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
 
         {/* Real events re-time everything downstream (never "assume" the flip) */}
         {!grow.flipDate && !p.flowering && p.day >= 14 && (
-          <button className="tv-btn tv-btn-soft" style={{ marginBottom: 14 }} onClick={() => { updateGrow({ flipDate: toDayStr(Date.now()) }); setToast("Plan updated from today"); }}>
+          <button className="tv-btn tv-btn-soft" style={{ marginBottom: 14 }} onClick={() => markToday("flipDate", "Plan updated from today")}>
             {auto ? "🌼 I see first pistils today" : "💡 I flipped to 12/12 today"}
           </button>
         )}
         {(p.scanTime || p.flowering) && !grow.harvestDate && (
           <div className="tv-btn-row" style={{ marginTop: 0, marginBottom: 14 }}>
             <button className="tv-btn tv-btn-primary" onClick={() => onScan(grow)}>🔬 Scan trichomes</button>
-            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => { updateGrow({ harvestDate: toDayStr(Date.now()) }); setToast("✂️ Harvest logged — drying plan started"); }}>✂️ I harvested</button>}
+            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => markToday("harvestDate", "✂️ Harvest logged — drying plan started")}>✂️ I harvested</button>}
           </div>
         )}
         {p.forecast?.last && (
@@ -411,7 +432,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             save(grows.filter((g) => g.id !== grow.id)); setView({ mode: "list" });
           }}>Delete grow</button>
         </div>
-        {toast && <div className="gp-toast">{toast}</div>}
+        {toast && <div className="gp-toast">{toast.msg ?? toast}{toast.undo && <button onClick={toast.undo}>Undo</button>}</div>}
       </>
     );
   }
@@ -439,7 +460,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
       })}
       <button className="tv-btn tv-btn-primary" onClick={() => { setDraft(newGrow()); setView({ mode: "edit" }); }}><Plus size={17} /> Start a new grow</button>
       <div className="tv-disclaimer" style={{ marginTop: 12 }}>Unlimited grows, free. Everything stays on this device.</div>
-      {toast && <div className="gp-toast">{toast}</div>}
+      {toast && <div className="gp-toast">{toast.msg ?? toast}</div>}
     </>
   );
 }

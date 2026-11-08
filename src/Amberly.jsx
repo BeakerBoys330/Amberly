@@ -623,10 +623,10 @@ const makeDiaryEntry = ({ strain, strainType, effect, analysis, rec, note, photo
 const INVITED_BY = new URLSearchParams(window.location.search).get("u");
 if (INVITED_BY) window.history.replaceState(null, "", "/");
 
-export default function Amberly() {
-  const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB upload ceiling
-  const VALID_TYPES = ["indica", "sativa", "hybrid"];
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB upload ceiling
+const PHOTO_TYPES = ["indica", "sativa", "hybrid"]; // everything that isn't an autoflower
 
+export default function Amberly() {
   const [accepted, setAccepted] = useState(hasConsent);
   const [step, setStep] = useState(cloudEnabled && INVITED_BY ? "community" : "welcome");
   const [strainType, setStrainType] = useState(null);
@@ -668,7 +668,7 @@ export default function Amberly() {
     if (!database.length) return [];
     let f = database;
     if (strainType === "autos") f = f.filter(s => s.type === "auto");
-    else if (strainType === "photos") f = f.filter(s => VALID_TYPES.includes(s.type));
+    else if (strainType === "photos") f = f.filter(s => PHOTO_TYPES.includes(s.type));
     const q = query.trim().toLowerCase();
     if (q) f = f.filter(s =>
       s.name?.toLowerCase().includes(q) || (s.breeder || "").toLowerCase().includes(q)
@@ -850,7 +850,9 @@ export default function Amberly() {
       return putInDiary({ ...entry, shared: false, sharing: null });
     }
     const { photo, author, shared, sharing, ...data } = entry;
-    await shareItem({ kind: "reading", localId: entry.id, growLocalId: entry.growId, data, audience,
+    // Shared on its own, not as part of a grow: stopping a grow's sharing must not delete it.
+    // (Which grow it came from is still in data.growId.)
+    await shareItem({ kind: "reading", localId: entry.id, data, audience,
       photos: photosRef.current.length ? photosRef.current : photo ? [photo] : [] });
     putInDiary({ ...entry, shared: true, sharing: audience });
   };
@@ -865,9 +867,11 @@ export default function Amberly() {
   }, []);
   const strainNames = useMemo(() => database.map(s => s.name), [database]);
 
-  // Deleting a shared entry also removes BeakerBoys' copy (best effort if offline).
+  // Deleting a shared entry also removes the shared copy (best effort if offline).
   const deleteDiaryEntry = useCallback((id) => {
-    if (cloudEnabled && diary.find(e => e.id === id)?.shared) unshare("local_id", [id]).catch(() => {});
+    const shared = diary.find(e => e.id === id)?.shared;
+    if (!window.confirm(`Delete this diary entry?${shared ? " Its shared copy will be deleted too." : ""}`)) return;
+    if (cloudEnabled && shared) unshare("local_id", [id]).catch(() => {});
     persistDiary(diary.filter(e => e.id !== id));
   }, [diary, persistDiary]);
 
@@ -882,8 +886,15 @@ export default function Amberly() {
   const removeAccount = async () => {
     if (!window.confirm("Delete your Amberly account and everything you've shared with BeakerBoys? Your grows stay on this device. This can't be undone.")) return;
     setAccountMsg("Deleting…");
-    try { await deleteAccount(); setAccountMsg("Your account and shared data were deleted."); }
-    catch (e) { setAccountMsg(e.message); }
+    try {
+      await deleteAccount();
+      // Nothing is shared any more: clear the "shared" marks so the app stops showing
+      // them (and stops trying to upload new grow entries).
+      persistDiary(diary.map(({ sharing, ...e }) => ({ ...e, shared: false })));
+      const grows = store.get(GROWS_KEY, []);
+      if (Array.isArray(grows)) store.set(GROWS_KEY, grows.map(({ sharing, ...g }) => ({ ...g, shared: false, logs: (g.logs || []).map(({ synced, ...l }) => l) })));
+      setAccountMsg("Your account and shared data were deleted.");
+    } catch (e) { setAccountMsg(e.message); }
   };
 
   if (!accepted) return (
@@ -1340,7 +1351,7 @@ export default function Amberly() {
       </div>
 
       {/* ═══════════════════════════════════════════
-          MODAL: ABOUT & STATS (read-only, no fake password)
+          MODAL: ABOUT (account, credits, delete data)
       ═══════════════════════════════════════════ */}
       {showAbout && (
         <div className="tv-overlay" onClick={() => setShowAbout(false)}>

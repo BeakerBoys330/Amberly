@@ -144,7 +144,8 @@ function Profile({ username, userId, onOpenUser }) {
     ))}
     {msg && <div className="tv-field-hint" style={{ margin: "8px 0" }}>{msg}</div>}
     <div style={{ marginTop: 16 }}>
-      <PostList userId={userId} onlyUser={person.id} onOpenUser={onOpenUser}
+      {/* Reload posts whenever follow/block status changes (e.g. hide them right after blocking). */}
+      <PostList key={`${f?.status}|${blocked}`} userId={userId} onlyUser={person.id} onOpenUser={onOpenUser}
         empty={isMe ? "Nothing shared with followers yet." : f?.status === "approved" || person.is_public ? "Nothing shared yet." : "Follow to see their grows."} />
     </div>
     {!isMe && !blocked && (
@@ -161,8 +162,9 @@ function Find({ onOpenUser }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   useEffect(() => {
-    const t = setTimeout(() => findUsers(q).then(setResults, () => setResults([])), 300);
-    return () => clearTimeout(t);
+    let live = true; // ignore answers to an older, shorter search that arrive late
+    const t = setTimeout(() => findUsers(q).then((r) => live && setResults(r), () => live && setResults([])), 300);
+    return () => { live = false; clearTimeout(t); };
   }, [q]);
   return (<>
     <input className="tv-input" autoCapitalize="none" placeholder="Search usernames" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 10 }} />
@@ -237,10 +239,12 @@ export default function Community({ openUsername, onBack }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!user) return;
-    myProfile().then(setProfile, (e) => setError(e.message));
-    myConnections().then((c) => setRequests(c.requests.length), () => {});
+    if (user) myProfile().then(setProfile, (e) => setError(e.message));
   }, [user]);
+  // Follow-request badge: refreshed each time you come back to the feed (e.g. after approving).
+  useEffect(() => {
+    if (user && view.mode === "feed") myConnections().then((c) => setRequests(c.requests.length), () => {});
+  }, [user, view.mode]);
 
   const openUser = (username) => setView({ mode: "profile", username });
   const back = view.mode === "feed" ? onBack : () => setView({ mode: "feed" });

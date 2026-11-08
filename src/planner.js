@@ -105,7 +105,8 @@ export function plan(g, scans = []) {
 
   let flower, harvest;
   if (auto) {
-    const total = +g.breederDays || AUTO_DAYS[g.autoSpeed] || 77;
+    const bd = +g.breederDays;                               // typed "days from seed": only trust sane values
+    const total = bd >= 40 && bd <= 200 ? bd : AUTO_DAYS[g.autoSpeed] || 77;
     const pre = Math.round(total * 0.32);                  // autos self-flower ~week 3–5
     flower = flipDay ?? pre;
     harvest = flower + (total - pre);
@@ -206,7 +207,7 @@ export function envCheck(stageKey, tempF, rh) {
 // ── Equipment helpers ───────────────────────────────────────────────────────
 export function lightCheck(g) {
   const area = (+g.tentW || 0) * (+g.tentL || 0), w = +g.lightWatts || 0;
-  if (!area || !w) return null;
+  if (area <= 0 || w <= 0) return null;
   const wpsf = w / area;
   const msg = wpsf < 20 ? "Under-lit for flowering — expect a smaller harvest."
     : wpsf < 30 ? "Adequate for flowering." : wpsf <= 50 ? "Strong — great for flowering." : "Very strong — dim it if tops bleach or temps climb.";
