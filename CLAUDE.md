@@ -103,7 +103,7 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 1. localStorage caps ~5 MB (~50–100 grow photos). App toasts when full. Next: Capacitor Filesystem.
 2. Reminder notifications (Capacitor Local Notifications) — top competitor-loved feature.
 3. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
-4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). Before launch: pin `connect-src`/`img-src` in `vercel.json` to the real Supabase project URL, and turn on Supabase CAPTCHA.
+4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). `connect-src`/`img-src` in `vercel.json` are pinned to the one Supabase project (change them if the project ever moves). Before launch: turn on Supabase CAPTCHA.
 5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list.
 6. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
 
