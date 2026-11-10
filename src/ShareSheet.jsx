@@ -10,10 +10,10 @@ export function useCloudUser() {
 }
 
 const Switch = ({ on, label, desc, onToggle }) => (
-  <div className="tv-toggle-row" onClick={onToggle}>
+  <button type="button" role="switch" aria-checked={on} className="tv-toggle-row" onClick={onToggle}>
     <div className="tv-toggle-text"><div className="tv-toggle-label">{label}</div><div className="tv-toggle-desc">{desc}</div></div>
     <div className={`tv-switch ${on ? "on" : ""}`}><div className="tv-switch-knob" /></div>
-  </div>
+  </button>
 );
 
 // Pick a username and who can follow. Used when someone first shares with
@@ -55,36 +55,43 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
     try { await fn(); } catch (e) { setError(e.message || "Something went wrong. Try again."); }
     setBusy(false);
   };
+  // Wrapping the fields in a form lets the keyboard's Go/Done key submit. preventDefault keeps the page from reloading.
+  const submit = (fn) => (e) => { e.preventDefault(); run(fn)(); };
+  const sendTo = async () => { await sendCode(email.trim(), LEGAL_VERSION); setCodeSent(true); setCode(""); };
   const needsName = audience.followers && profile === null;
   const nothing = !audience.followers && !audience.training;
   const alreadyShared = Boolean(current);
 
   return (
-    <div className="tv-overlay" onClick={busy ? undefined : onClose}>
+    <div className="tv-overlay" onClick={busy || codeSent ? undefined : onClose}>
       <div className="tv-modal" onClick={(e) => e.stopPropagation()}>
         <div className="tv-modal-pad">
           <div className="tv-modal-title">{onShare ? `Share ${what}` : "Sign in to Amberly"}</div>
 
           {!user ? (<>
             <p className="tv-field-hint" style={{ marginBottom: 12 }}>
-              {onShare ? "Sharing needs a simple account: " : "Optional — Amberly works fully without an account. "}
-              Just your email, no password. We'll email you a 6-digit code.
+              {onShare ? "Sharing needs a simple account. " : "This is optional. Amberly works fully without an account. "}
+              {codeSent ? `We sent a 6-digit code to ${email.trim()}. It can take a minute, so check spam too.` : "Just your email, no password. We'll email you a 6-digit code."}
             </p>
-            {!codeSent ? (<>
-              <input className="tv-input" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com"
-                value={email} onChange={(e) => setEmail(e.target.value)} style={{ marginBottom: 12 }} />
-              <button className="tv-btn tv-btn-primary" disabled={busy || !/^\S+@\S+\.\S+$/.test(email.trim())}
-                onClick={run(async () => { await sendCode(email.trim(), LEGAL_VERSION); setCodeSent(true); })}>
-                {busy ? "Sending…" : "Email me a code"}
-              </button>
-            </>) : (<>
-              <input className="tv-input" inputMode="numeric" autoComplete="one-time-code" placeholder="6-digit code" maxLength={6}
-                value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} style={{ marginBottom: 12 }} />
-              <button className="tv-btn tv-btn-primary" disabled={busy || code.length !== 6} onClick={run(() => verifyCode(email.trim(), code))}>
-                {busy ? "Checking…" : "Sign in"}
-              </button>
-              <button className="tv-link" onClick={() => { setCodeSent(false); setCode(""); }}>Use a different email</button>
-            </>)}
+            {!codeSent ? (
+              <form onSubmit={submit(sendTo)}>
+                <input className="tv-input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder="you@example.com" aria-label="Email"
+                  value={email} onChange={(e) => setEmail(e.target.value)} style={{ marginBottom: 12 }} />
+                <button className="tv-btn tv-btn-primary" disabled={busy || !/^\S+@\S+\.\S+$/.test(email.trim())}>
+                  {busy ? "Sending…" : "Email me a code"}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={submit(() => verifyCode(email.trim(), code))}>
+                <input className="tv-input" inputMode="numeric" autoComplete="one-time-code" placeholder="6-digit code" aria-label="6-digit code" maxLength={6} autoFocus
+                  value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} style={{ marginBottom: 12 }} />
+                <button className="tv-btn tv-btn-primary" disabled={busy || code.length !== 6}>
+                  {busy ? "Checking…" : "Sign in"}
+                </button>
+                <button type="button" className="tv-link" disabled={busy} onClick={run(sendTo)}>Send a new code</button>
+                <button type="button" className="tv-link" disabled={busy} onClick={() => { setCodeSent(false); setCode(""); setError(""); }}>Use a different email</button>
+              </form>
+            )}
           </>) : profile === undefined ? (
             <div className="tv-field-hint">Loading…</div>
           ) : (<>
@@ -109,7 +116,7 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
             </button>
           </>)}
 
-          {error && <div className="tv-error-msg" style={{ marginTop: 10 }}>{error}</div>}
+          {error && <div className="tv-error-msg" role="alert" style={{ marginTop: 10 }}>{error}</div>}
           <button className="tv-btn tv-btn-ghost" style={{ marginTop: 8 }} disabled={busy} onClick={onClose}>Cancel</button>
         </div>
       </div>

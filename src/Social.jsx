@@ -14,19 +14,19 @@ import { fmtDate } from "./planner.js";
 //  • every post and profile has Report and Block (Apple guideline 1.2)
 const SC_STYLES = `
   .sc-post { background: #fffdfa; border: 1px solid #efe7dc; border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
-  .sc-head { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #8a7f74; margin-bottom: 6px; }
-  .sc-user { background: none; border: none; padding: 0; font-weight: 700; color: #2b2622; font-size: 14px; cursor: pointer; }
+  .sc-head { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #766b60; margin-bottom: 6px; }
+  .sc-user { background: none; border: none; padding: 0; min-height: 44px; font-weight: 700; color: #2b2622; font-size: 14px; cursor: pointer; }
   .sc-body { font-size: 14.5px; color: #3d352e; line-height: 1.5; }
   .sc-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin-top: 10px; }
   .sc-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: #f1e9dd; }
   .sc-reacts { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
-  .sc-react { border: 1px solid #efe7dc; background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 14px; cursor: pointer; }
+  .sc-react { border: 1px solid #efe7dc; background: #fff; border-radius: 99px; min-width: 48px; min-height: 44px; padding: 0 12px; font-size: 16px; color: #2b2622; cursor: pointer; }
   .sc-react.on { background: #fbefdc; border-color: #d99a3c; }
-  .sc-more { margin-left: auto; background: none; border: none; color: #a4988a; font-size: 18px; cursor: pointer; padding: 2px 6px; }
-  .sc-person { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f3ece2; font-size: 15px; }
+  .sc-more { margin-left: auto; background: none; border: none; color: #766b60; font-size: 20px; cursor: pointer; min-width: 44px; min-height: 44px; }
+  .sc-person { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px solid #f3ece2; font-size: 15px; }
   .sc-person:last-child { border-bottom: none; }
-  .sc-person .tv-link { padding: 4px 6px; font-size: 14px; }
-  .sc-badge { background: #d99a3c; color: #fff; border-radius: 99px; font-size: 11px; padding: 1px 7px; margin-left: 4px; }
+  .sc-person .tv-link { padding: 12px 8px; font-size: 14px; }
+  .sc-badge { background: #d99a3c; color: #2b2622; font-weight: 700; border-radius: 99px; font-size: 11px; padding: 1px 7px; margin-left: 4px; }
 `;
 
 const LOG_LABEL = { water: "💧 Watered", feed: "🧪 Fed", photo: "📷 New photo", env: "🌡️ Climate check", note: "✏️ Note" };
@@ -35,10 +35,10 @@ function describe(p) {
   if (p.kind === "grow") return `🌱 Sharing a ${d.strainName || "new"} grow (${d.plantType === "auto" ? "autoflower" : "photoperiod"}, ${d.medium || "soil"})`;
   if (p.kind === "reading") {
     const r = d.reading || {};
-    return `🔬 Trichome check on ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? ` — ${d.note}` : ""}`;
+    return `🔬 Trichome check on ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? `. ${d.note}` : ""}`;
   }
   const extra = d.type === "env" ? ` · ${d.temp}°F, ${d.rh}% RH` : d.type === "feed" && (d.ec || d.ph) ? ` · ${d.ec ? `EC ${d.ec}` : ""} ${d.ph ? `pH ${d.ph}` : ""}` : "";
-  return `${LOG_LABEL[d.type] || "Update"}${extra}${d.note ? ` — ${d.note}` : ""}`;
+  return `${LOG_LABEL[d.type] || "Update"}${extra}${d.note ? `: ${d.note}` : ""}`;
 }
 
 const REPORT_REASONS = ["Selling or buying", "Looks underage", "Harassment or hate", "Nudity or violence", "Spam", "Something else"];
@@ -73,7 +73,7 @@ function Post({ post, userId, onOpenUser, onBlocked }) {
         <div className="tv-tip" style={{ marginTop: 10 }}>
           <b>Report this post</b>
           <div>{REPORT_REASONS.map((r) => <button key={r} className="tv-link" style={{ paddingLeft: 0, marginRight: 8 }}
-            onClick={act(() => report({ userId: post.user_id, itemId: post.id, reason: r }), "Thanks — BeakerBoys will review this within 24 hours.")}>{r}</button>)}</div>
+            onClick={act(() => report({ userId: post.user_id, itemId: post.id, reason: r }), "Thanks. BeakerBoys will review this within 24 hours.")}>{r}</button>)}</div>
           <button className="tv-link" style={{ paddingLeft: 0, color: "#b0442c" }}
             onClick={act(async () => {
               if (!window.confirm(`Block @${post.username}? You won't see each other's posts.`)) return false;
@@ -150,7 +150,7 @@ function Profile({ username, userId, onOpenUser }) {
     </div>
     {!isMe && !blocked && (
       <div style={{ textAlign: "center", marginTop: 8 }}>
-        <button className="tv-link" onClick={act(() => report({ userId: person.id, reason: "Profile reported" }), "Thanks — BeakerBoys will review this within 24 hours.")}>Report</button>
+        <button className="tv-link" onClick={act(() => report({ userId: person.id, reason: "Profile reported" }), "Thanks. BeakerBoys will review this within 24 hours.")}>Report</button>
         <button className="tv-link" style={{ color: "#b0442c" }}
           onClick={act(async () => (window.confirm(`Block @${person.username}?`) ? block(person.id) : false), "Blocked.")}>Block</button>
       </div>
@@ -161,18 +161,22 @@ function Profile({ username, userId, onOpenUser }) {
 function Find({ onOpenUser }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
+  const [error, setError] = useState("");
   useEffect(() => {
     let live = true; // ignore answers to an older, shorter search that arrive late
-    const t = setTimeout(() => findUsers(q).then((r) => live && setResults(r), () => live && setResults([])), 300);
+    const t = setTimeout(() => findUsers(q).then(
+      (r) => { if (live) { setResults(r); setError(""); } },
+      (e) => { if (live) { setResults([]); setError(e.message); } }), 300);
     return () => { live = false; clearTimeout(t); };
   }, [q]);
   return (<>
-    <input className="tv-input" autoCapitalize="none" placeholder="Search usernames" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 10 }} />
+    <input className="tv-input" autoCapitalize="none" autoCorrect="off" placeholder="Search usernames" aria-label="Search usernames" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 10 }} />
     {results.map((p) => (
       <div key={p.id} className="sc-person"><button className="sc-user" onClick={() => onOpenUser(p.username)}>@{p.username}</button>
         <span className="tv-field-hint">{p.is_public ? "public" : "approves followers"}</span></div>
     ))}
-    {q.length >= 2 && !results.length && <div className="tv-field-hint">No growers found.</div>}
+    {error ? <div className="tv-error-msg" role="alert">{error}</div>
+      : q.length >= 2 && !results.length && <div className="tv-field-hint">No growers found.</div>}
   </>);
 }
 

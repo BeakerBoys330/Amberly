@@ -1,7 +1,10 @@
 {
-  "name": "Amberly — Harvest Timing & Grow Planner",
+  "id": "/",
+  "name": "Amberly: Harvest Timing & Grow Planner",
   "short_name": "Amberly",
+  "description": "Time your harvest from trichome photos and plan every stage of a home grow.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#faf6f0",
   "theme_color": "#faf6f0",

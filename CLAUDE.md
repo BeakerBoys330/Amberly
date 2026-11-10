@@ -52,6 +52,8 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 - Blob URLs are tracked in `objectUrlsRef` and revoked on reset/unmount.
 - Derived data uses `useMemo` (e.g. `filtered`), never state + effect.
 - No `alert()`; use inline UI/toasts. `window.confirm` only for destructive deletes.
+- **Navigation:** change screens in Amberly.jsx with `go(step)` / `leave(n)`, never `setStep` directly. Each screen is a browser-history entry, so Android Back and the iPhone edge swipe step back instead of closing the app.
+- **Logs:** adding or deleting a grow log shows a toast with Undo. `save()` in GrowPlanner returns false when storage is full; don't show a success message in that case.
 
 ## Trichome analysis (rule-based, on-device)
 - Pixels → HSL. **Pistil exclusion is the headline correctness rule:** orange/brown hairs are NOT amber trichomes. Pistils `H 6–40, S > 40, L 30–82` → ignored. Amber: `H 20–62, S 32–55, L 30–80`. Pixels with `S ≥ 42` that aren't amber are ignored.
@@ -79,10 +81,11 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 
 ## Design system
 Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier dark/monochrome "lab" look.
-- Background `#faf6f0`, cards `#fffdfa`, borders `#efe7dc`, text `#2b2622`, muted `#8a7f74`, single accent amber `#d99a3c` (hover `#cf8f30`, text `#b07b3e`).
+- Background `#faf6f0`, cards `#fffdfa`, borders `#efe7dc`, text `#2b2622`, muted `#766b60`, single accent amber `#d99a3c` (hover `#cf8f30`, text `#8f6128`). Amber buttons use dark ink text (`#2b2622`), not white: white on amber fails contrast.
 - Inter font, self-hosted via `@fontsource/inter` (no Google Fonts); 14–22px radii; soft shadows; generous whitespace; emoji as friendly icons.
 - Screens open with a big plain-language question ("What are you growing?").
 - Progress dots for multi-step flows. Mobile-first, must fit 320px wide with no horizontal scroll.
+- Tap targets ≥ 44px. Choices are one tap (no separate Continue button). Plain sentences in user-facing copy: no em dashes.
 - Contrast: keep secondary text ≥ 4.5:1.
 
 ## Privacy & policy decisions
