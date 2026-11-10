@@ -95,10 +95,10 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
           </>) : profile === undefined ? (
             <div className="tv-field-hint">Loading…</div>
           ) : (<>
-            <Switch on={audience.followers} label="👥 Followers can see this"
+            <Switch on={audience.followers} label="Followers can see this"
               desc="People you approve (or anyone, if your profile is public) can follow along and react."
               onToggle={() => setAudience((a) => ({ ...a, followers: !a.followers }))} />
-            <Switch on={audience.training} label="💚 Help train Amberly"
+            <Switch on={audience.training} label="Help train Amberly"
               desc="BeakerBoys may use the photos and notes to improve trichome reading. Never shown to others."
               onToggle={() => setAudience((a) => ({ ...a, training: !a.training }))} />
             {needsName && <div style={{ marginTop: 6 }}><ProfileFields value={draft} onChange={setDraft} /></div>}

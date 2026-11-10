@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowLeft } from "lucide-react";
+import Icon from "./Icon.jsx";
 import {
   myProfile, saveProfile, findUsers, profileByUsername, inviteLink, myConnections, follow, unfollow,
   approveFollower, removeFollower, block, unblock, report, posts, react, unreact, REACTIONS, USERNAME_RULE,
@@ -29,13 +30,13 @@ const SC_STYLES = `
   .sc-badge { background: #d99a3c; color: #2b2622; font-weight: 700; border-radius: 99px; font-size: 11px; padding: 1px 7px; margin-left: 4px; }
 `;
 
-const LOG_LABEL = { water: "💧 Watered", feed: "🧪 Fed", photo: "📷 New photo", env: "🌡️ Climate check", note: "✏️ Note" };
+const LOG_LABEL = { water: "Watered", feed: "Fed", photo: "New photo", env: "Climate check", note: "Note" };
 function describe(p) {
   const d = p.data || {};
-  if (p.kind === "grow") return `🌱 Sharing a ${d.strainName || "new"} grow (${d.plantType === "auto" ? "autoflower" : "photoperiod"}, ${d.medium || "soil"})`;
+  if (p.kind === "grow") return `Sharing a ${d.strainName || "new"} grow (${d.plantType === "auto" ? "autoflower" : "photoperiod"}, ${d.medium || "soil"})`;
   if (p.kind === "reading") {
     const r = d.reading || {};
-    return `🔬 Trichome check on ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? `. ${d.note}` : ""}`;
+    return `Trichome check on ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? `. ${d.note}` : ""}`;
   }
   const extra = d.type === "env" ? ` · ${d.temp}°F, ${d.rh}% RH` : d.type === "feed" && (d.ec || d.ph) ? ` · ${d.ec ? `EC ${d.ec}` : ""} ${d.ph ? `pH ${d.ph}` : ""}` : "";
   return `${LOG_LABEL[d.type] || "Update"}${extra}${d.note ? `: ${d.note}` : ""}`;
@@ -101,7 +102,7 @@ function PostList({ userId, onlyUser, onOpenUser, empty }) {
 
   if (error) return <div className="tv-error-msg">{error}</div>;
   if (!list) return <div className="tv-field-hint">Loading…</div>;
-  if (!list.length) return <div className="tv-diary-empty"><div className="tv-diary-empty-emoji">🌱</div>{empty}</div>;
+  if (!list.length) return <div className="tv-diary-empty"><div className="tv-big-icon"><Icon name="sprout" size={36} /></div>{empty}</div>;
   return (<>
     {list.map((p) => <Post key={p.id} post={p} userId={userId} onOpenUser={onOpenUser}
       onBlocked={(id) => setList((cur) => cur.filter((x) => x.user_id !== id))} />)}
@@ -269,8 +270,8 @@ export default function Community({ openUsername, onBack }) {
   </>);
   else if (view.mode === "feed") body = (<>
     <div className="tv-btn-row" style={{ marginTop: 0, marginBottom: 14 }}>
-      <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "find" })}>🔍 Find</button>
-      <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "people" })}>👥 Followers{requests > 0 && <span className="sc-badge">{requests}</span>}</button>
+      <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "find" })}><Icon name="search" /> Find</button>
+      <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "people" })}><Icon name="users" /> Followers{requests > 0 && <span className="sc-badge">{requests}</span>}</button>
     </div>
     <PostList userId={user.id} onOpenUser={openUser} empty="When people you follow share their grows, updates show up here, newest first." />
   </>);

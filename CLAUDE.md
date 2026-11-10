@@ -24,6 +24,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 |---|---|
 | `src/Amberly.jsx` | Main app: welcome → strain select → Effect Dial + capture → analysis → diary. Also diary screen, share sheet hookup, About modal (account, delete data). Holds the design-system CSS (`STYLES`, `tv-*` classes). |
 | `src/GrowPlanner.jsx` | Planner UI: grow list, setup form, Today card, quick-log, 21-day strip, targets, timeline, photos, history. Reuses `tv-*` classes; extra `gp-*` CSS in `GP_STYLES`. |
+| `src/Icon.jsx` | The app's icon set (lucide line icons picked by name). `planner.js` names the icon for each stage and milestone. |
 | `src/planner.js` | Pure logic + research data, no React: `STAGES` table, `plan()`, `waterPlan()`, `feedPlan()`, `envCheck()` (VPD), `lightCheck()`, `flipHeight()`, `scanForecast()`, date helpers, `store`. |
 | `src/strain-database.json` | Starter strain list (27, curated), bundled into the app (works offline). Facts only — no third-party image links. |
 | `src/trichomes.js` | Pixel color rules (`classifyPixel`, `analyzeImage`). Tuned with `tools/calibrate.html`. |
@@ -82,7 +83,8 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 ## Design system
 Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier dark/monochrome "lab" look.
 - Background `#faf6f0`, cards `#fffdfa`, borders `#efe7dc`, text `#2b2622`, muted `#766b60`, single accent amber `#d99a3c` (hover `#cf8f30`, text `#8f6128`). Amber buttons use dark ink text (`#2b2622`), not white: white on amber fails contrast.
-- Inter font, self-hosted via `@fontsource/inter` (no Google Fonts); 14–22px radii; soft shadows; generous whitespace; emoji as friendly icons.
+- Inter font, self-hosted via `@fontsource/inter` (no Google Fonts); 14–22px radii; soft shadows; generous whitespace.
+- Icons are drawn line icons from `src/Icon.jsx` (`<Icon name>`; `<Tile name>` puts one on a soft amber tile). No emoji in the interface, they look different on every phone. The only emoji are the four follower reactions.
 - Screens open with a big plain-language question ("What are you growing?").
 - Progress dots for multi-step flows. Mobile-first, must fit 320px wide with no horizontal scroll.
 - Tap targets ≥ 44px. Choices are one tap (no separate Continue button). Plain sentences in user-facing copy: no em dashes.

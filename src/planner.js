@@ -46,32 +46,32 @@ export const relDay = (d) => {
 // ── Stage targets (research §7 consolidated table) ──────────────────────────
 // ranges are [min, max]; temps °F; ec = mS/cm (×500 for ppm-500 meters)
 export const STAGES = {
-  germination: { label: "Germination", emoji: "🫘", ppfd: [75, 200], dli: [6, 12], day: [75, 80], night: [70, 75], rh: [70, 90], vpd: [0.4, 0.6],
+  germination: { label: "Germination", icon: "bean", ppfd: [75, 200], dli: [6, 12], day: [75, 80], night: [70, 75], rh: [70, 90], vpd: [0.4, 0.6],
     ec: { soil: [0, 0], coco: [0.2, 0.4] }, feed: "None. The seed feeds itself.",
     tasks: ["Keep the medium moist, not soaked", "Note the day it breaks the surface"] },
-  seedling: { label: "Seedling", emoji: "🌱", ppfd: [100, 300], dli: [15, 20], day: [70, 80], night: [65, 75], rh: [65, 75], vpd: [0.4, 0.8],
+  seedling: { label: "Seedling", icon: "sprout", ppfd: [100, 300], dli: [15, 20], day: [70, 80], night: [65, 75], rh: [65, 75], vpd: [0.4, 0.8],
     ec: { soil: [0, 0.4], coco: [0.4, 0.6] }, feed: "Plain water in soil. ¼-strength in coco/hydro.",
     tasks: ["Small ring waterings around the stem", "Start gentle LST (tie-down) at 3–4 nodes"] },
-  earlyVeg: { label: "Early veg", emoji: "🌿", ppfd: [300, 450], dli: [20, 30], day: [72, 82], night: [65, 75], rh: [55, 70], vpd: [0.8, 1.0],
+  earlyVeg: { label: "Early veg", icon: "leaf", ppfd: [300, 450], dli: [20, 30], day: [72, 82], night: [65, 75], rh: [55, 70], vpd: [0.8, 1.0],
     ec: { soil: [0.6, 1.0], coco: [0.8, 1.2] }, feed: "Nitrogen-heavy veg/grow formula, start at half strength.",
     tasks: ["Top or FIM at 4–6 nodes (autos: once at most, before pistils)", "Keep LST going to open the canopy"] },
-  lateVeg: { label: "Late veg", emoji: "🌳", ppfd: [450, 650], dli: [30, 40], day: [72, 85], night: [65, 75], rh: [50, 60], vpd: [1.0, 1.2],
+  lateVeg: { label: "Late veg", icon: "tree", ppfd: [450, 650], dli: [30, 40], day: [72, 85], night: [65, 75], rh: [50, 60], vpd: [1.0, 1.2],
     ec: { soil: [1.0, 1.4], coco: [1.2, 1.8] }, feed: "Nitrogen plus rising phosphorus/potassium.",
     tasks: ["Water to 10–20% runoff", "Light clean-up of lower leaves before flower"] },
-  stretch: { label: "Early flower (stretch)", emoji: "🌼", ppfd: [600, 800], dli: [25, 35], day: [70, 80], night: [64, 72], rh: [45, 55], vpd: [1.0, 1.3],
+  stretch: { label: "Early flower (stretch)", icon: "flower", ppfd: [600, 800], dli: [25, 35], day: [70, 80], night: [64, 72], rh: [45, 55], vpd: [1.0, 1.3],
     ec: { soil: [1.2, 1.6], coco: [1.4, 2.0] }, feed: "Shift to bloom formula: P/K up, keep some N.",
     tasks: ["Plants can double in height, so keep an eye on light distance", "Optional: defoliate around flower day 21", "No more topping from here"] },
-  midFlower: { label: "Mid flower", emoji: "🌸", ppfd: [800, 1000], dli: [35, 45], day: [68, 80], night: [62, 72], rh: [40, 50], vpd: [1.2, 1.5],
+  midFlower: { label: "Mid flower", icon: "flower2", ppfd: [800, 1000], dli: [35, 45], day: [68, 80], night: [62, 72], rh: [40, 50], vpd: [1.2, 1.5],
     ec: { soil: [1.4, 1.8], coco: [1.6, 2.2] }, feed: "Peak bloom feeding: high P/K, low N.",
     tasks: ["Peak thirst: check pots daily", "No high-stress training", "Keep humidity down: buds are getting dense"] },
-  lateFlower: { label: "Late flower", emoji: "🍯", ppfd: [650, 900], dli: [25, 40], day: [65, 78], night: [60, 68], rh: [35, 45], vpd: [1.2, 1.6],
+  lateFlower: { label: "Late flower", icon: "hourglass", ppfd: [650, 900], dli: [25, 40], day: [65, 78], night: [60, 68], rh: [35, 45], vpd: [1.2, 1.6],
     ec: { soil: [1.0, 1.4], coco: [0.9, 1.4] }, feed: "Taper off: potassium-heavy, low nitrogen.",
     tasks: ["Scan trichomes every 2–3 days", "Yellowing fan leaves now is normal", "Start your flush if you chose one"] },
-  drying: { label: "Drying", emoji: "🌬️", day: [60, 70], night: [60, 70], rh: [55, 62],
+  drying: { label: "Drying", icon: "wind", day: [60, 70], night: [60, 70], rh: [55, 62],
     tasks: ["Dark room, gentle airflow. Aim for 60°F / 60% RH", "Done when small stems snap (7–14 days)"] },
-  curing: { label: "Curing", emoji: "🫙", day: [60, 70], night: [60, 70], rh: [58, 62],
+  curing: { label: "Curing", icon: "jar", day: [60, 70], night: [60, 70], rh: [58, 62],
     tasks: ["Jars about ¾ full, target 58–62% RH", "Burp daily week 1, every 2–3 days week 2, then weekly"] },
-  done: { label: "Cured & ready", emoji: "🏆", tasks: ["Enjoy it, and log how it turned out"] },
+  done: { label: "Cured & ready", icon: "trophy", tasks: ["Enjoy it, and log how it turned out"] },
 };
 const FLOWER_KEYS = ["stretch", "midFlower", "lateFlower"];
 export const PH = { soil: "6.3–6.8", coco: "5.8–6.2", hydro: "5.5–6.0" };
@@ -129,13 +129,13 @@ export function plan(g, scans = []) {
   const flush = +g.flush || 0;
 
   const milestones = [
-    { label: "Sprout", date: at(3), emoji: "🫘" },
-    { label: auto ? "First pistils (auto-flowers)" : "Flip to 12/12", date: at(flower), emoji: auto ? "🌼" : "💡", actual: !!g.flipDate },
-    { label: "Start trichome scans", date: at(Math.max(flower, harvest - 14)), emoji: "🔬" },
-    flush && { label: `Start ${flush}-day flush`, date: at(harvest - flush), emoji: "🚿" },
-    { label: fc?.date && !g.harvestDate ? "Harvest (from your scans)" : "Estimated harvest", date: at(harvest), emoji: "✂️", actual: !!g.harvestDate },
-    { label: "Dry done → into jars", date: at(harvest + 10), emoji: "🫙" },
-    { label: "Cured & ready", date: at(harvest + 38), emoji: "🏆" },
+    { label: "Sprout", date: at(3), icon: "bean" },
+    { label: auto ? "First pistils (auto-flowers)" : "Flip to 12/12", date: at(flower), icon: auto ? "flower" : "bulb", actual: !!g.flipDate },
+    { label: "Start trichome scans", date: at(Math.max(flower, harvest - 14)), icon: "microscope" },
+    flush && { label: `Start ${flush}-day flush`, date: at(harvest - flush), icon: "shower" },
+    { label: fc?.date && !g.harvestDate ? "Harvest (from your scans)" : "Estimated harvest", date: at(harvest), icon: "scissors", actual: !!g.harvestDate },
+    { label: "Dry done → into jars", date: at(harvest + 10), icon: "jar" },
+    { label: "Cured & ready", date: at(harvest + 38), icon: "trophy" },
   ].filter(Boolean);
 
   return {

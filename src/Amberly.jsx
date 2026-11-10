@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from "react";
 import { Search, Plus, ArrowLeft } from "lucide-react";
+import Icon, { Tile } from "./Icon.jsx";
 import GrowPlanner from "./GrowPlanner.jsx";
 import { store, GROWS_KEY } from "./planner.js";
 import { analyzeImage } from "./trichomes.js";
@@ -138,11 +139,13 @@ const STYLES = `
     background: #fff8ee;
   }
 
-  .tv-choice-emoji {
-    font-size: 30px;
-    line-height: 1;
-    flex-shrink: 0;
+  .tv-icon-tile {
+    width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+    background: #fbf0dd; color: #8f6128;
+    display: flex; align-items: center; justify-content: center;
   }
+  .tv-ic { flex-shrink: 0; vertical-align: -0.18em; }
+  .tv-big-icon { color: #8f6128; margin-bottom: 10px; }
   .tv-choice-text { flex: 1; min-width: 0; }
   .tv-choice-name {
     display: block;
@@ -360,8 +363,7 @@ const STYLES = `
     display: flex; align-items: center; gap: 14px;
   }
   .tv-dial-opt:hover { border-color: #e0cdb0; }
-  .tv-dial-opt.active { border-color: #d99a3c; background: #fff8ee; }
-  .tv-dial-emoji { font-size: 24px; flex-shrink: 0; }
+  .tv-dial-opt.active { border-color: #d99a3c; background: #fff8ee; }
   .tv-dial-text { flex: 1; }
   .tv-dial-label { display: block; font-size: 16px; font-weight: 600; color: #2b2622; letter-spacing: -0.01em; }
   .tv-dial-blurb { display: block; font-size: 13px; color: #766b60; margin-top: 2px; }
@@ -374,8 +376,7 @@ const STYLES = `
     background: #fffdfa; padding: 38px 22px; text-align: center; cursor: pointer;
     transition: border-color 0.18s, background 0.18s;
   }
-  .tv-upload:hover { border-color: #d99a3c; background: #fff8ee; }
-  .tv-upload-emoji { font-size: 34px; margin-bottom: 12px; }
+  .tv-upload:hover { border-color: #d99a3c; background: #fff8ee; }
   .tv-upload-text { font-size: 16px; font-weight: 600; color: #2b2622; }
   .tv-upload-hint { font-size: 13.5px; color: #766b60; margin-top: 6px; line-height: 1.5; }
 
@@ -403,8 +404,7 @@ const STYLES = `
   .tv-fill-amber { background: #d99a3c; }
 
   /* ── RECOMMENDATION CARD ── */
-  .tv-rec { border-radius: 20px; padding: 26px; margin-bottom: 14px; border: 1.5px solid; }
-  .tv-rec-emoji { font-size: 36px; margin-bottom: 10px; }
+  .tv-rec { border-radius: 20px; padding: 26px; margin-bottom: 14px; border: 1.5px solid; }
   .tv-rec-stage { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: #2b2622; }
   .tv-rec-timing { font-size: 14px; font-weight: 600; margin-top: 4px; margin-bottom: 16px; }
   .tv-rec-note { font-size: 15px; color: #4a4138; line-height: 1.55; }
@@ -412,13 +412,13 @@ const STYLES = `
   .tv-rec-detail { font-size: 13px; color: #766b60; margin-top: 6px; }
 
   .tv-rec-early  { background: #f6f1ea; border-color: #e8ddcc; }
-  .tv-rec-early  .tv-rec-timing { color: #766b60; }
+  .tv-rec-early  :is(.tv-rec-timing, .tv-big-icon) { color: #766b60; }
   .tv-rec-window { background: #fff8ee; border-color: #f0e0c6; }
-  .tv-rec-window .tv-rec-timing { color: #8f6128; }
+  .tv-rec-window :is(.tv-rec-timing, .tv-big-icon) { color: #8f6128; }
   .tv-rec-peak   { background: #f0f5ee; border-color: #d6e4d0; }
-  .tv-rec-peak   .tv-rec-timing { color: #4f6e44; }
+  .tv-rec-peak   :is(.tv-rec-timing, .tv-big-icon) { color: #4f6e44; }
   .tv-rec-late   { background: #fbefe6; border-color: #f0d6bf; }
-  .tv-rec-late   .tv-rec-timing { color: #a05a2c; }
+  .tv-rec-late   :is(.tv-rec-timing, .tv-big-icon) { color: #a05a2c; }
 
   /* ── WARN / DISCLAIMER / ERROR ── */
   .tv-warn {
@@ -430,7 +430,7 @@ const STYLES = `
     background: #fceeec; border: 1px solid #f3d2cc; border-radius: 16px;
     padding: 18px; display: flex; gap: 13px; align-items: flex-start; margin-bottom: 14px;
   }
-  .tv-error-emoji { font-size: 22px; flex-shrink: 0; }
+  .tv-error svg { color: #c0492f; margin-top: 1px; }
   .tv-error-title { font-size: 15px; font-weight: 600; color: #c0492f; margin-bottom: 3px; }
   .tv-error-msg { font-size: 13.5px; color: #9a4a3a; line-height: 1.5; }
 
@@ -477,8 +477,7 @@ const STYLES = `
   /* ── DIARY ── */
   .tv-diary-empty {
     text-align: center; padding: 40px 20px; color: #766b60;
-  }
-  .tv-diary-empty-emoji { font-size: 40px; margin-bottom: 14px; }
+  }
   .tv-diary-entry {
     background: #fffdfa; border: 1px solid #efe7dc; border-radius: 18px;
     padding: 16px; margin-bottom: 12px; display: flex; gap: 14px;
@@ -489,7 +488,7 @@ const STYLES = `
   }
   .tv-diary-thumb-ph {
     width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
-    background: #f1e9dd; display: flex; align-items: center; justify-content: center; font-size: 26px;
+    background: #f1e9dd; display: flex; align-items: center; justify-content: center; color: #8f6128;
   }
   .tv-diary-body { flex: 1; min-width: 0; }
   .tv-diary-strain { font-size: 15px; font-weight: 600; color: #2b2622; letter-spacing: -0.01em; }
@@ -967,7 +966,7 @@ export default function Amberly() {
               {/* One tap picks the type and moves on: no separate Continue button. */}
               <div className="tv-choice">
                 <button className="tv-choice-btn" onClick={() => { setStrainType("autos"); go("strain-select"); }}>
-                  <span className="tv-choice-emoji">🌱</span>
+                  <Tile name="sprout" />
                   <span className="tv-choice-text">
                     <span className="tv-choice-name">Autoflower</span>
                     <span className="tv-choice-desc">Flowers on its own, about 8–10 weeks</span>
@@ -975,7 +974,7 @@ export default function Amberly() {
                 </button>
 
                 <button className="tv-choice-btn" onClick={() => { setStrainType("photos"); go("strain-select"); }}>
-                  <span className="tv-choice-emoji">☀️</span>
+                  <Tile name="sun" />
                   <span className="tv-choice-text">
                     <span className="tv-choice-name">Photoperiod</span>
                     <span className="tv-choice-desc">Flowers on a light schedule, about 8–12 weeks</span>
@@ -984,18 +983,18 @@ export default function Amberly() {
               </div>
 
               <button className="tv-btn tv-btn-soft" style={{ marginTop: 12 }} onClick={() => go("grows")}>
-                🗓️ Grow planner &amp; calendar
+                <Icon name="calendar" /> Grow planner &amp; calendar
               </button>
 
               {cloudEnabled && (
                 <button className="tv-btn tv-btn-soft" style={{ marginTop: 12 }} onClick={() => go("community")}>
-                  👥 Following
+                  <Icon name="users" /> Following
                 </button>
               )}
 
               {diary.length > 0 && (
                 <button className="tv-btn tv-btn-soft" style={{ marginTop: 12 }} onClick={() => go("diary")}>
-                  📖 My grow diary ({diary.length})
+                  <Icon name="book" /> My grow diary ({diary.length})
                 </button>
               )}
 
@@ -1108,7 +1107,7 @@ export default function Amberly() {
 
               {strain && (
                 <div className="tv-banner">
-                  <div className="tv-banner-img" style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🌿</div>
+                  <Tile name="leaf" />
                   <div>
                     <div className="tv-banner-name">{strain.name}</div>
                     <div className="tv-banner-meta">{strain.breeder || "Your strain"}</div>
@@ -1129,7 +1128,7 @@ export default function Amberly() {
                     className={`tv-dial-opt ${effect === key ? "active" : ""}`}
                     onClick={() => setEffect(key)}
                   >
-                    <span className="tv-dial-emoji">{key === "energetic" ? "⚡" : key === "balanced" ? "⚖️" : "🌙"}</span>
+                    <Tile name={key === "energetic" ? "zap" : key === "balanced" ? "scale" : "moon"} />
                     <span className="tv-dial-text">
                       <span className="tv-dial-label">{p.label}</span>
                       <span className="tv-dial-blurb">{p.blurb}</span>
@@ -1149,7 +1148,7 @@ export default function Amberly() {
 
               {!image ? (
                 <button type="button" className="tv-upload" onClick={() => fileRef.current?.click()}>
-                  <div className="tv-upload-emoji">📷</div>
+                  <div className="tv-big-icon"><Icon name="photo" size={32} /></div>
                   <div className="tv-upload-text">Take or choose photos</div>
                   <div className="tv-upload-hint">One photo or several. Get close on the buds.</div>
                 </button>
@@ -1176,7 +1175,7 @@ export default function Amberly() {
 
               {photoError && !analyzing && (
                 <div className="tv-error" role="alert" style={{ marginTop: 14 }}>
-                  <span className="tv-error-emoji">🔍</span>
+                  <Icon name="search" size={22} />
                   <div>
                     <div className="tv-error-title">Couldn't read that one</div>
                     <div className="tv-error-msg">{photoError}</div>
@@ -1225,9 +1224,7 @@ export default function Amberly() {
 
                   {rec && (
                     <div className={`tv-rec ${rec.cls}`}>
-                      <div className="tv-rec-emoji">
-                        {rec.cls === "tv-rec-peak" ? "✅" : rec.cls === "tv-rec-late" ? "🌙" : rec.cls === "tv-rec-window" ? "⏳" : "🌱"}
-                      </div>
+                      <div className="tv-big-icon"><Icon name={rec.cls === "tv-rec-peak" ? "check" : rec.cls === "tv-rec-late" ? "moon" : rec.cls === "tv-rec-window" ? "hourglass" : "sprout"} size={34} /></div>
                       <div className="tv-rec-stage">{rec.stage}</div>
                       <div className="tv-rec-timing">{rec.timing}</div>
                       <div className="tv-rec-note">{rec.note}</div>
@@ -1243,7 +1240,7 @@ export default function Amberly() {
                   {/* Save to grow diary — add an optional note, then keep it on-device */}
                   {!savedToDiary ? (
                     <div className="tv-note-box">
-                      <div className="tv-note-title">📖 Save to your grow diary</div>
+                      <div className="tv-note-title">Save to your grow diary</div>
                       <textarea
                         className="tv-textarea"
                         placeholder="Optional note, like 'Week 8, frosty, giving it 4 more days'"
@@ -1276,7 +1273,7 @@ export default function Amberly() {
                     </div>
                   ) : (
                     <button className="tv-btn tv-btn-soft" style={{ marginBottom: 10 }} onClick={() => setSharing(true)}>
-                      👥 Share this reading
+                      <Icon name="users" /> Share this reading
                     </button>
                   ))}
                   {sharing && <ShareSheet what="this reading" audience={savedEntry?.sharing || undefined}
@@ -1327,7 +1324,7 @@ export default function Amberly() {
 
               {diary.length === 0 ? (
                 <div className="tv-diary-empty">
-                  <div className="tv-diary-empty-emoji">🌱</div>
+                  <div className="tv-big-icon"><Icon name="sprout" size={36} /></div>
                   <div>After you analyze a plant, tap <b>Save entry</b> to start your diary.</div>
                 </div>
               ) : (
@@ -1335,7 +1332,7 @@ export default function Amberly() {
                   <div key={e.id} className="tv-diary-entry">
                     {e.photo
                       ? <img className="tv-diary-thumb" src={e.photo} alt={e.strainName} />
-                      : <div className="tv-diary-thumb-ph">🌿</div>}
+                      : <div className="tv-diary-thumb-ph"><Icon name="leaf" size={26} /></div>}
                     <div className="tv-diary-body">
                       <div className="tv-diary-strain">{e.strainName}</div>
                       <div className="tv-diary-date">
