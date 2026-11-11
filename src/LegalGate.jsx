@@ -5,7 +5,7 @@ import { store } from "./planner.js";
 // First-launch agreement: 21+, local law, Terms + Privacy. Shown again whenever
 // LEGAL_VERSION changes (bump it when terms.html or privacy.html change materially).
 export const CONSENT_KEY = "amberly.consent.v1";
-export const LEGAL_VERSION = "2026-10-21";
+export const LEGAL_VERSION = "2026-11-11";
 export const hasConsent = () => store.get(CONSENT_KEY, null)?.version === LEGAL_VERSION;
 
 const ITEMS = [

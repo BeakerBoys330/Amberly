@@ -46,7 +46,17 @@ From now on: after any change, write a summary → **Commit to main** → **Push
 7. **Project Settings → API Keys**: copy the **Project URL** and the
    **Publishable key** (starts with `sb_publishable_`).
    **Never copy the "secret" key into the app or GitHub.**
-8. To test sharing on your PC: copy `.env.example` to `.env.local` and paste the two
+8. **Bot check on sign-in (before a wide launch):** stops bots from using the sign-in
+   form to spam email inboxes.
+   - Go to dash.cloudflare.com (free account) → **Turnstile** → **Add widget**. Name
+     `Amberly`, hostnames: your Vercel address (e.g. `amberly-coral.vercel.app`) and
+     `localhost`. Widget mode **Managed**. Create.
+   - Copy the **Site key** into Vercel → Settings → Environment Variables as
+     `VITE_TURNSTILE_SITE_KEY` (and into `.env.local` to test on your PC), then redeploy.
+   - Only after that deploy is live: Supabase → **Authentication → Attack Protection** →
+     turn on **CAPTCHA protection**, provider **Turnstile**, paste the **Secret key**,
+     Save. (In the other order, sign-in breaks until the deploy finishes.)
+9. To test sharing on your PC: copy `.env.example` to `.env.local` and paste the two
    values in. Restart `npm run dev`.
 
 **Seeing what people shared:** Supabase → **Table Editor → shared_items** (the data)

@@ -104,11 +104,11 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 1. localStorage caps ~5 MB (~50–100 grow photos). App toasts when full. Next: Capacitor Filesystem.
 2. Reminder notifications (Capacitor Local Notifications) — top competitor-loved feature.
 3. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
-4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). `connect-src`/`img-src` in `vercel.json` are pinned to the one Supabase project (change them if the project ever moves). Before launch: turn on Supabase CAPTCHA.
+4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). `connect-src`/`img-src` in `vercel.json` are pinned to the one Supabase project (change them if the project ever moves). Sign-in has a Cloudflare Turnstile bot check (`botCheck` in cloud.js, on when `VITE_TURNSTILE_SITE_KEY` is set; Supabase verifies the token); its script loads only when the sign-in sheet opens.
 5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list.
 6. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
 
 ## Verification
 - `npm test` must pass. It covers these planner sanity checks: auto standard harvest = day 77; photo hybrid 4-wk veg harvest = day 105; 75 °F / 55% RH → VPD ≈ 1.0 kPa; 480 W in 4×4 = 30 W/sq ft; 72" tent, 5 gal, hybrid → flip at 15".
 - Run `npm test` and `npm run build` before declaring done; test on an iPhone in Safari.
-- **Security:** no third-party scripts, fonts, or images — everything loads from our own host so the CSP in `vercel.json` can stay strict (`script-src 'self'`). A backend later means adding its origin to `connect-src`.
+- **Security:** no third-party scripts, fonts, or images — everything loads from our own host so the CSP in `vercel.json` can stay strict (`script-src 'self'`). The one exception is Cloudflare Turnstile (`challenges.cloudflare.com` in `script-src`/`frame-src`), loaded only on the sign-in sheet. A backend later means adding its origin to `connect-src`.

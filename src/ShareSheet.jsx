@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
-import { currentUser, onUserChange, sendCode, verifyCode, myProfile, saveProfile, USERNAME_RULE } from "./cloud.js";
+import { useState, useEffect, useRef } from "react";
+import { currentUser, onUserChange, sendCode, verifyCode, myProfile, saveProfile, USERNAME_RULE, botCheckEnabled, botCheck } from "./cloud.js";
 import { LEGAL_VERSION } from "./LegalGate.jsx";
 
-// Signed-in grower (or null), kept in sync with sign-in / sign-out anywhere.
+// Signed-in grower, null when signed out, undefined while still checking.
+// Kept in sync with sign-in / sign-out anywhere.
 export function useCloudUser() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined);
   useEffect(() => { currentUser().then(setUser); return onUserChange(setUser); }, []);
   return user;
 }
@@ -46,7 +47,16 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
   const [draft, setDraft] = useState({ username: "", is_public: false });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Bot check pass for the next sign-in email: "" = not ready yet, null = couldn't load.
+  const [pass, setPass] = useState("");
+  const checkBox = useRef(null);
+  const check = useRef(null);
 
+  useEffect(() => {
+    if (user !== null || !botCheckEnabled) return;
+    check.current = botCheck(checkBox.current, setPass);
+    return check.current.remove;
+  }, [user]);
   useEffect(() => { if (user && !onShare) onClose(); }, [user, onShare, onClose]);
   useEffect(() => { if (user && onShare) myProfile().then(setProfile, () => setProfile(null)); }, [user, onShare]);
 
@@ -57,7 +67,12 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
   };
   // Wrapping the fields in a form lets the keyboard's Go/Done key submit. preventDefault keeps the page from reloading.
   const submit = (fn) => (e) => { e.preventDefault(); run(fn)(); };
-  const sendTo = async () => { await sendCode(email.trim(), LEGAL_VERSION); setCodeSent(true); setCode(""); };
+  // Each pass works once, so get a fresh one after every send, even a failed one.
+  const sendTo = async () => {
+    try { await sendCode(email.trim(), LEGAL_VERSION, pass || undefined); } finally { check.current?.reset(); }
+    setCodeSent(true); setCode("");
+  };
+  const waiting = botCheckEnabled && !pass;
   const needsName = audience.followers && profile === null;
   const nothing = !audience.followers && !audience.training;
   const alreadyShared = Boolean(current);
@@ -77,8 +92,8 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
               <form onSubmit={submit(sendTo)}>
                 <input className="tv-input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder="you@example.com" aria-label="Email"
                   value={email} onChange={(e) => setEmail(e.target.value)} style={{ marginBottom: 12 }} />
-                <button className="tv-btn tv-btn-primary" disabled={busy || !/^\S+@\S+\.\S+$/.test(email.trim())}>
-                  {busy ? "Sending…" : "Email me a code"}
+                <button className="tv-btn tv-btn-primary" disabled={busy || waiting || !/^\S+@\S+\.\S+$/.test(email.trim())}>
+                  {busy ? "Sending…" : waiting && pass !== null ? "Checking you're human…" : "Email me a code"}
                 </button>
               </form>
             ) : (
@@ -88,10 +103,12 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
                 <button className="tv-btn tv-btn-primary" disabled={busy || code.length !== 6}>
                   {busy ? "Checking…" : "Sign in"}
                 </button>
-                <button type="button" className="tv-link" disabled={busy} onClick={run(sendTo)}>Send a new code</button>
+                <button type="button" className="tv-link" disabled={busy || waiting} onClick={run(sendTo)}>Send a new code</button>
                 <button type="button" className="tv-link" disabled={busy} onClick={() => { setCodeSent(false); setCode(""); setError(""); }}>Use a different email</button>
               </form>
             )}
+            {botCheckEnabled && <div ref={checkBox} style={{ marginTop: 10 }} />}
+            {pass === null && <div className="tv-error-msg" role="alert" style={{ marginTop: 10 }}>Couldn't load the sign-in check. Check your connection and try again.</div>}
           </>) : profile === undefined ? (
             <div className="tv-field-hint">Loading…</div>
           ) : (<>

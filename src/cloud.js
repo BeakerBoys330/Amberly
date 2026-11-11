@@ -13,7 +13,38 @@ const BUCKET = "shared-photos";
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+const botCheckKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
 export const cloudEnabled = Boolean(url && key);
+export const botCheckEnabled = Boolean(cloudEnabled && botCheckKey);
+
+// Bot check before a sign-in email is sent (Cloudflare Turnstile), so nobody can
+// use Amberly to spam inboxes. Its script loads only when the sign-in sheet opens:
+// growers who never sign in never contact Cloudflare. Usually invisible; it shows a
+// checkbox only when it's unsure. onToken gets a one-time pass, "" when it lapses,
+// or null when the check couldn't load. Returns { reset, remove }.
+let turnstilePromise = null;
+const turnstile = () => (turnstilePromise ??= new Promise((resolve, reject) => {
+  const s = document.createElement("script");
+  s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+  s.onload = () => resolve(window.turnstile);
+  s.onerror = () => { turnstilePromise = null; s.remove(); reject(); }; // offline: try again next time
+  document.head.appendChild(s);
+}));
+export function botCheck(el, onToken) {
+  let id, gone = false;
+  turnstile().then((t) => {
+    if (gone) return;
+    id = t.render(el, {
+      sitekey: botCheckKey, appearance: "interaction-only", size: "flexible",
+      callback: onToken, "expired-callback": () => onToken(""), "error-callback": () => onToken(null),
+    });
+  }, () => onToken(null));
+  return {
+    reset: () => { if (id !== undefined) { onToken(""); window.turnstile.reset(id); } },
+    remove: () => { gone = true; if (id !== undefined) window.turnstile.remove(id); },
+  };
+}
 
 // The Supabase library (~half the app's code) is only downloaded the first time
 // someone signs in or opens a cloud feature. Growers who never sign in never load it.
@@ -39,6 +70,7 @@ const check = ({ error }) => {
   if (/row-level security/i.test(error.message || "")) throw new Error("Amberly couldn't do that. If you've shared or reported a lot today, try again tomorrow.");
   const msg = error.message || "";
   if (/fetch|network|failed to/i.test(msg)) throw new Error("Couldn't reach Amberly's server. Check your connection and try again.");
+  if (/captcha/i.test(msg)) throw new Error("The sign-in check didn't go through. Wait a moment, then try again.");
   if (error.status === 429 || /rate limit|security purposes/i.test(msg)) throw new Error("Too many tries. Wait a minute, then try again.");
   if (/expired|invalid/i.test(msg)) throw new Error("That code didn't work. Check it, or send a new one.");
   throw new Error("Something went wrong. Please try again."); // never show raw server text
@@ -58,8 +90,8 @@ export async function currentUser() {
   return data.session?.user ?? null;
 }
 export const onUserChange = (cb) => { listeners.add(cb); return () => listeners.delete(cb); };
-export const sendCode = async (email, termsVersion) =>
-  check(await (await client()).auth.signInWithOtp({ email, options: { shouldCreateUser: true, data: { terms_version: termsVersion, confirmed_21_plus: true } } }));
+export const sendCode = async (email, termsVersion, captchaToken) =>
+  check(await (await client()).auth.signInWithOtp({ email, options: { shouldCreateUser: true, captchaToken, data: { terms_version: termsVersion, confirmed_21_plus: true } } }));
 export const verifyCode = async (email, token) => check(await (await client()).auth.verifyOtp({ email, token, type: "email" }));
 export const signOut = async () => check(await (await client()).auth.signOut());
 
