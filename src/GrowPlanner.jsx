@@ -6,6 +6,7 @@ import {
 } from "./planner.js";
 import { cloudEnabled, syncGrow, setAudience, unshare } from "./cloud.js";
 import ShareSheet from "./ShareSheet.jsx";
+import Icon, { Tile } from "./Icon.jsx";
 
 // Grow planner: setup → today card (what to do now) → one-tap logging → timeline.
 // Reuses the main app's tv-* design system; only planner-specific bits live below.
@@ -15,34 +16,36 @@ const GP_STYLES = `
   .gp-quick { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
   .gp-quick button { background: #fffdfa; border: 1px solid #efe7dc; border-radius: 14px; padding: 12px 4px;
     cursor: pointer; font-size: 11.5px; color: #6b5d4c; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .gp-quick button span { font-size: 22px; }
+  .gp-quick button svg, .gp-ms svg { color: #8f6128; }
   .gp-quick button:active { transform: scale(0.96); }
   .gp-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #f3ece2; font-size: 14px; }
   .gp-row:last-child { border-bottom: none; }
   .gp-row b { color: #2b2622; font-weight: 600; text-align: right; }
-  .gp-row span { color: #8a7f74; }
+  .gp-row span { color: #766b60; }
   .gp-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
   .gp-day { aspect-ratio: 1; border-radius: 10px; background: #f7f0e6; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; font-size: 11px; color: #a4988a; line-height: 1.1; }
+    align-items: center; justify-content: center; font-size: 11px; color: #766b60; line-height: 1.1; }
   .gp-day.today { outline: 2px solid #d99a3c; color: #2b2622; font-weight: 600; }
-  .gp-day i { font-style: normal; font-size: 13px; min-height: 15px; }
+  .gp-day i { display: flex; min-height: 15px; color: #8f6128; }
   .gp-day.plan i { opacity: 0.35; }
   .gp-ms { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #f3ece2; font-size: 14px; }
   .gp-ms:last-child { border-bottom: none; }
   .gp-ms.past { opacity: 0.5; }
-  .gp-ms .when { margin-left: auto; color: #8a7f74; font-size: 13px; white-space: nowrap; }
+  .gp-ms .when { margin-left: auto; color: #766b60; font-size: 13px; white-space: nowrap; }
   .gp-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .gp-photo { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; background: #f1e9dd; }
   .gp-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .gp-issue { font-size: 13.5px; padding: 10px 13px; border-radius: 12px; margin-top: 8px; line-height: 1.45; }
-  .gp-issue.warn { background: #fdf3e3; color: #9a6f30; }
+  .gp-issue.warn { background: #fdf3e3; color: #8c5f25; }
   .gp-issue.bad { background: #fceeec; color: #b0442c; }
-  .gp-issue.ok { background: #f0f5ee; color: #5e7d52; }
+  .gp-issue.ok { background: #f0f5ee; color: #4f6e44; }
   .gp-label { font-size: 13px; font-weight: 600; color: #5c5249; margin: 16px 0 7px; }
   .gp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .gp-toast button { background: none; border: none; color: #f2c37a; font-weight: 700; font-size: 14px; margin-left: 14px; cursor: pointer; padding: 0; }
-  .gp-toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #2b2622; color: #fff;
+  .gp-toast button { background: none; border: none; color: #f2c37a; font-weight: 700; font-size: 14px; cursor: pointer; padding: 14px 20px 14px 14px; margin: -12px -20px -12px 0; }
+  .gp-toast { position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #2b2622; color: #fff;
+    max-width: calc(100vw - 32px); width: max-content; display: flex; align-items: center;
     padding: 12px 20px; border-radius: 99px; font-size: 14px; z-index: 60; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+  .gp-log-del { background: none; border: none; color: #766b60; font-size: 15px; cursor: pointer; width: 44px; height: 44px; margin: -12px -14px -12px 0; }
 `;
 
 // Segmented pill picker — the whole setup form is built from these, so most
@@ -74,14 +77,17 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   const [sheet, setSheet] = useState(null);     // { type, ...fields } for feed/climate/note
   const [toast, setToast] = useState("");
   const [sharing, setSharing] = useState(false); // "Share this grow" sheet open
+  const [allHistory, setAllHistory] = useState(false);
   const photoRef = useRef(null);
   const growsRef = useRef(grows);               // latest grows, for code that finishes after an upload
   growsRef.current = grows;
 
   // Persist on every change; storage is the one place that can fail (quota).
   const save = useCallback((next) => {
-    setGrows(next);
-    if (!store.set(GROWS_KEY, next)) setToast("Storage full — delete old photos to keep saving");
+    const ok = store.set(GROWS_KEY, next);
+    if (ok) setGrows(next); // what's on screen is always what's saved
+    else setToast("Storage is full. Delete old photos to keep saving.");
+    return ok;
   }, []);
   // toast: a message, or { msg, undo } — Undo toasts stay up a little longer.
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), toast.undo ? 6000 : 2400); return () => clearTimeout(t); }, [toast]);
@@ -90,7 +96,17 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   const patchGrow = (id, fn) => save(growsRef.current.map((g) => (g.id === id ? { ...g, ...fn(g) } : g)));
   const updateGrow = (patch) => patchGrow(grow.id, () => patch);
   // Build on the latest logs (not this render's copy): a photo can finish loading after an upload changed them.
-  const addLog = (type, fields, msg) => { patchGrow(grow.id, (cur) => ({ logs: [...cur.logs, makeLog(type, fields)] })); setToast(msg); setSheet(null); };
+  // Every new entry comes with Undo, so a mis-tap on "Watered" costs nothing.
+  const addLog = (type, fields, msg) => {
+    const id = grow.id, log = makeLog(type, fields);
+    if (!patchGrow(id, (cur) => ({ logs: [...cur.logs, log] }))) return; // storage full: the toast says so
+    setToast({ msg, undo: () => { removeLog(id, log.id); setToast(""); } });
+    setSheet(null);
+  };
+  const removeLog = (growId, logId) => {
+    if (cloudEnabled && growsRef.current.find((g) => g.id === growId)?.shared) unshare("local_id", [logId]).catch(() => {});
+    patchGrow(growId, (cur) => ({ logs: cur.logs.filter((l) => l.id !== logId) }));
+  };
   // "I flipped" / "first pistils" / "I harvested": one tap, with Undo in case of a mis-tap.
   const markToday = (field, msg) => {
     const id = grow.id;
@@ -123,18 +139,24 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
     }
     await unshare("grow_local_id", [grow.id]);
     updateGrow({ shared: false, sharing: null, logs: grow.logs.map(({ synced, ...l }) => l) });
-    setToast("Stopped sharing — the shared copy was deleted");
+    setToast("Stopped sharing. The shared copy was deleted.");
   };
-  const deleteLog = (id) => {
-    if (cloudEnabled && grow.shared) unshare("local_id", [id]).catch(() => {});
-    updateGrow({ logs: grow.logs.filter((x) => x.id !== id) });
+  // Deleting an entry can be undone; a restored entry is sent again if the grow is shared.
+  const deleteLog = ({ synced, ...log }) => {
+    const id = grow.id;
+    removeLog(id, log.id);
+    setToast({ msg: "Entry deleted", undo: () => {
+      patchGrow(id, (cur) => ({ logs: [...cur.logs, log].sort((a, b) => a.date.localeCompare(b.date)) }));
+      setToast("");
+    } });
   };
   // While a grow is shared, quietly send new entries and key dates — now, and again
   // whenever the phone gets its connection back.
   const pending = grow?.shared ? `${grow.logs.filter((l) => !l.synced).length}|${grow.flipDate}|${grow.harvestDate}|${grow.editedAt}` : null;
   useEffect(() => {
     if (!cloudEnabled || !pending) return;
-    const send = () => pushGrow(growsRef.current.find((g) => g.id === grow.id)).catch(() => {});
+    const send = () => pushGrow(growsRef.current.find((g) => g.id === grow.id))
+      .catch(() => setToast("Couldn't update the shared copy. We'll try again next time."));
     if (navigator.onLine) send();
     window.addEventListener("online", send);
     return () => window.removeEventListener("online", send);
@@ -147,7 +169,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    try { addLog("photo", { photo: await fileToThumb(file) }, "📷 Photo added"); }
+    try { addLog("photo", { photo: await fileToThumb(file) }, "Photo added"); }
     catch (err) { setToast(err?.message || "Couldn't read that photo"); }
   };
 
@@ -182,7 +204,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           <input className="tv-input" list="gp-strains" placeholder="e.g. Gorilla Cookies Auto" {...field("strainName")} />
           <datalist id="gp-strains">{strainNames.map((n) => <option key={n} value={n} />)}</datalist>
           <div className="gp-label">Plant type</div>
-          <Seg value={draft.plantType} onChange={set("plantType")} options={[["auto", "🌱 Autoflower"], ["photo", "☀️ Photoperiod"]]} />
+          <Seg value={draft.plantType} onChange={set("plantType")} options={[["auto", "Autoflower"], ["photo", "Photoperiod"]]} />
           <div className="gp-label">Genetics</div>
           <Seg value={draft.genetics} onChange={set("genetics")} options={[["indica", "Indica"], ["hybrid", "Hybrid"], ["sativa", "Sativa"]]} />
           {auto ? (<>
@@ -200,7 +222,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         </Card>
 
         <Card title="Your setup">
-          <Seg value={draft.location} onChange={set("location")} options={[["indoor", "🏠 Indoor"], ["outdoor", "🌤️ Outdoor"]]} />
+          <Seg value={draft.location} onChange={set("location")} options={[["indoor", "Indoor"], ["outdoor", "Outdoor"]]} />
           <div className="gp-label">Growing medium</div>
           <Seg value={draft.medium} onChange={set("medium")} options={[["soil", "Soil"], ["coco", "Coco"], ["hydro", "Hydro"]]} />
           {draft.medium !== "hydro" && (<>
@@ -216,15 +238,15 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
               <div><label className="tv-field-label">Tent height (in)</label><input className="tv-input" type="number" inputMode="numeric" {...field("tentHeight")} /></div>
             </div>
           </>)}
-          <label className="tv-toggle-row" style={{ marginTop: 14, marginBottom: 0 }} onClick={() => set("roWater")(!draft.roWater)}>
+          <button type="button" role="switch" aria-checked={Boolean(draft.roWater)} className="tv-toggle-row" style={{ marginTop: 14, marginBottom: 0 }} onClick={() => set("roWater")(!draft.roWater)}>
             <div className="tv-toggle-text"><div className="tv-toggle-label">Using RO or very soft water</div><div className="tv-toggle-desc">We'll remind you about Cal-Mag.</div></div>
             <div className={`tv-switch ${draft.roWater ? "on" : ""}`}><div className="tv-switch-knob" /></div>
-          </label>
+          </button>
         </Card>
 
         <Card title="Your goal">
-          <Seg value={draft.effect} onChange={set("effect")} options={[["energetic", "⚡ Energetic"], ["balanced", "⚖️ Balanced"], ["relaxed", "🌙 Relaxed"]]} />
-          <div className="gp-label">Flush before harvest? <span className="tv-field-hint">(experts disagree — optional)</span></div>
+          <Seg value={draft.effect} onChange={set("effect")} options={[["energetic", "Energetic"], ["balanced", "Balanced"], ["relaxed", "Relaxed"]]} />
+          <div className="gp-label">Flush before harvest? <span className="tv-field-hint">(optional, experts disagree)</span></div>
           <Seg value={+draft.flush} onChange={set("flush")} options={[[0, "No flush"], [7, "7 days"], [14, "14 days"]]} />
           <div className="gp-label">Nickname <span className="tv-field-hint">(optional)</span></div>
           <input className="tv-input" placeholder="e.g. Tent A – left" {...field("name")} />
@@ -252,7 +274,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
       const d = addDays(today, i - 7).getTime(), logs = grow.logs.filter((l) => dayStart(l.date) === d);
       const fed = logs.some((l) => l.type === "feed"), watered = logs.some((l) => l.type === "water");
       const planned = !w.hydro && growing && d >= nextWater && daysBetween(nextWater, d) % w.interval === 0;
-      return { d, icon: fed ? "🧪" : watered ? "💧" : logs.some((l) => l.type === "photo") ? "📷" : planned ? "💧" : "", plan: planned && !fed && !watered };
+      return { d, icon: fed ? "feed" : watered ? "water" : logs.some((l) => l.type === "photo") ? "photo" : planned ? "water" : "", plan: planned && !fed && !watered };
     });
 
     return (
@@ -261,21 +283,21 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         <button className="tv-back" onClick={() => setView({ mode: "list" })}><ArrowLeft size={17} /> My grows</button>
 
         <div className="tv-banner">
-          <div style={{ fontSize: 32 }}>{st.emoji}</div>
+          <Tile name={st.icon} />
           <div style={{ flex: 1 }}>
             <div className="tv-banner-name">{grow.name}</div>
             <div className="tv-banner-meta">Day {Math.max(0, p.day)} · {st.label} · {auto ? "Auto" : "Photo"}</div>
             <div className="gp-progress"><div style={{ width: `${p.progress * 100}%` }} /></div>
-            <div className="tv-banner-meta">Harvest ≈ {fmtDate(p.harvestDate)} ({relDay(p.harvestDate)})</div>
+            <div className="tv-banner-meta">Harvest ≈ {fmtDate(p.harvestDate)} ({relDay(p.harvestDate).toLowerCase()})</div>
           </div>
         </div>
 
         {/* TODAY — reminders carry the exact payload (amount, EC, pH) */}
         <Card title="Today">
           {w.hydro ? <Row k="Reservoir" v="Top off; full change every 7–14 days" /> : growing && (<>
-            <Row k={overdue ? "💧 Water" : "💧 Next water"} v={overdue ? (w.last ? "Due now" : "When top inch is dry") : relDay(w.next)} />
+            <Row k={overdue ? "Water" : "Next water"} v={overdue ? (w.last ? "Due now" : "When top inch is dry") : relDay(w.next)} />
             <Row k="Amount" v={`~${w.liters.toFixed(1)} L (${w.gal.toFixed(1)} gal)${p.stageKey === "seedling" ? ", ring around stem" : ""}`} />
-            <Row k="This watering" v={w.feedNext && f?.ec[1] ? "Feed 🧪" : "Plain water"} />
+            <Row k="This watering" v={w.feedNext && f?.ec[1] ? "Feed" : "Plain water"} />
           </>)}
           {f && f.ec[1] > 0 && (<>
             <Row k="Target EC" v={`${range(f.ec)} (${range(f.ppm)} ppm)`} />
@@ -286,16 +308,16 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         </Card>
 
         <div className="gp-quick">
-          <button onClick={() => addLog("water", {}, "💧 Watering logged")}><span>💧</span>Watered</button>
-          <button onClick={() => setSheet({ type: "feed", ec: "", ph: "", note: "" })}><span>🧪</span>Fed</button>
-          <button onClick={() => photoRef.current?.click()}><span>📷</span>Photo</button>
-          <button onClick={() => setSheet({ type: "env", temp: "", rh: "" })}><span>🌡️</span>Climate</button>
-          <button onClick={() => setSheet({ type: "note", note: "" })}><span>✏️</span>Note</button>
+          <button onClick={() => addLog("water", {}, "Watering logged")}><Icon name="water" size={22} />Watered</button>
+          <button onClick={() => setSheet({ type: "feed", ec: "", ph: "", note: "" })}><Icon name="feed" size={22} />Fed</button>
+          <button onClick={() => photoRef.current?.click()}><Icon name="photo" size={22} />Photo</button>
+          <button onClick={() => setSheet({ type: "env", temp: "", rh: "" })}><Icon name="env" size={22} />Climate</button>
+          <button onClick={() => setSheet({ type: "note", note: "" })}><Icon name="note" size={22} />Note</button>
         </div>
         <input ref={photoRef} type="file" accept="image/*" onChange={pickPhoto} style={{ display: "none" }} />
 
         {sheet && (
-          <Card title={{ feed: "🧪 Log a feeding", env: "🌡️ Climate check", note: "✏️ Add a note" }[sheet.type]}>
+          <Card title={{ feed: "Log a feeding", env: "Climate check", note: "Add a note" }[sheet.type]}>
             {sheet.type === "feed" && <div className="gp-two" style={{ marginBottom: 10 }}>
               <input className="tv-input" type="number" step="0.1" inputMode="decimal" min="0" max="10" placeholder="EC (optional)" value={sheet.ec} onChange={(e) => setSheet({ ...sheet, ec: e.target.value })} />
               <input className="tv-input" type="number" step="0.1" inputMode="decimal" min="0" max="14" placeholder="pH (optional)" value={sheet.ph} onChange={(e) => setSheet({ ...sheet, ph: e.target.value })} />
@@ -312,9 +334,9 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
                   || (sheet.type === "feed" && ((sheet.ec !== "" && !inRange(sheet.ec, 0, 10)) || (sheet.ph !== "" && !inRange(sheet.ph, 0, 14))))
                   || (sheet.type === "note" && !sheet.note.trim())}
                 onClick={() => {
-                  if (sheet.type === "feed") addLog("feed", { ec: sheet.ec ? +sheet.ec : null, ph: sheet.ph ? +sheet.ph : null, note: sheet.note.trim() }, "🧪 Feeding logged");
-                  if (sheet.type === "env") addLog("env", { temp: +sheet.temp, rh: +sheet.rh }, "🌡️ Climate saved");
-                  if (sheet.type === "note") addLog("note", { note: sheet.note.trim().slice(0, 2000) }, "✏️ Note saved");
+                  if (sheet.type === "feed") addLog("feed", { ec: sheet.ec ? +sheet.ec : null, ph: sheet.ph ? +sheet.ph : null, note: sheet.note.trim() }, "Feeding logged");
+                  if (sheet.type === "env") addLog("env", { temp: +sheet.temp, rh: +sheet.rh }, "Climate saved");
+                  if (sheet.type === "note") addLog("note", { note: sheet.note.trim().slice(0, 2000) }, "Note saved");
                 }}>Save</button>
             </div>
           </Card>
@@ -323,18 +345,18 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         {/* Real events re-time everything downstream (never "assume" the flip) */}
         {!grow.flipDate && !p.flowering && p.day >= 14 && (
           <button className="tv-btn tv-btn-soft" style={{ marginBottom: 14 }} onClick={() => markToday("flipDate", "Plan updated from today")}>
-            {auto ? "🌼 I see first pistils today" : "💡 I flipped to 12/12 today"}
+            <Icon name={auto ? "flower" : "bulb"} /> {auto ? "I see first pistils today" : "I flipped to 12/12 today"}
           </button>
         )}
         {(p.scanTime || p.flowering) && !grow.harvestDate && (
           <div className="tv-btn-row" style={{ marginTop: 0, marginBottom: 14 }}>
-            <button className="tv-btn tv-btn-primary" onClick={() => onScan(grow)}>🔬 Scan trichomes</button>
-            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => markToday("harvestDate", "✂️ Harvest logged — drying plan started")}>✂️ I harvested</button>}
+            <button className="tv-btn tv-btn-primary" onClick={() => onScan(grow)}><Icon name="microscope" /> Scan trichomes</button>
+            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => markToday("harvestDate", "Harvest logged. Drying plan started.")}><Icon name="scissors" /> I harvested</button>}
           </div>
         )}
         {p.forecast?.last && (
           <div className={`gp-issue ${p.forecast.ready ? "ok" : "warn"}`} style={{ marginTop: 0, marginBottom: 14 }}>
-            Last scan: {p.forecast.last.a}% amber. {p.forecast.ready ? "You've reached your target — harvest window is open." : p.forecast.date ? `At this pace you'll hit your target around ${fmtDate(p.forecast.date)}.` : "Scan again in 2–3 days to project your harvest date."}
+            Last scan: {p.forecast.last.a}% amber. {p.forecast.ready ? "You've reached your target. The harvest window is open." : p.forecast.date ? `At this pace you'll hit your target around ${fmtDate(p.forecast.date)}.` : "Scan again in 2–3 days to project your harvest date."}
           </div>
         )}
 
@@ -342,11 +364,11 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           <div className="gp-strip">
             {strip.map((s) => (
               <div key={s.d} className={`gp-day ${s.d === today ? "today" : ""} ${s.plan ? "plan" : ""}`}>
-                <i>{s.icon}</i>{new Date(s.d).getDate()}
+                <i><Icon name={s.icon} size={13} /></i>{new Date(s.d).getDate()}
               </div>
             ))}
           </div>
-          <div className="tv-field-hint" style={{ marginTop: 8 }}>Solid = done · faded 💧 = planned</div>
+          <div className="tv-field-hint" style={{ marginTop: 8 }}>Solid = done · faded = planned</div>
         </Card>
 
         <Card title={`${st.label} targets`}>
@@ -359,15 +381,15 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           {envRes && (<>
             <div className="gp-label">Last climate check ({relDay(env.date)}): {env.temp}°F · {env.rh}% · VPD {envRes.vpd.toFixed(2)}</div>
             {envRes.issues.length ? envRes.issues.map(([lvl, m]) => <div key={m} className={`gp-issue ${lvl}`}>{m}</div>)
-              : <div className="gp-issue ok">Right in the zone. 👌</div>}
+              : <div className="gp-issue ok">Right in the zone.</div>}
           </>)}
         </Card>
 
         {(fh || lc || grow.location === "outdoor") && (
           <Card title="Setup check">
             {fh && <Row k="Flip when plant is about" v={`${fh} in tall`} />}
-            {fh && <div className="tv-field-hint" style={{ marginBottom: 8 }}>Plants stretch {grow.genetics === "indica" ? "~1.5×" : grow.genetics === "sativa" ? "2–3×" : "~2×"} after the flip — this keeps tops clear of your light.</div>}
-            {lc && <div className={`gp-issue ${lc.ok ? "ok" : "warn"}`}>{lc.wpsf} watts/sq ft — {lc.msg}</div>}
+            {fh && <div className="tv-field-hint" style={{ marginBottom: 8 }}>Plants stretch {grow.genetics === "indica" ? "~1.5×" : grow.genetics === "sativa" ? "2–3×" : "~2×"} after the flip. This keeps the tops clear of your light.</div>}
+            {lc && <div className={`gp-issue ${lc.ok ? "ok" : "warn"}`}>{lc.wpsf} watts per sq ft. {lc.msg}</div>}
             {grow.location === "outdoor" && !auto && <div className="gp-issue warn">Outdoors, photoperiods start flowering when days shorten (≈ late July–August at mid-latitudes). Tap "I flipped" when you see pistils. Watch frost dates near harvest.</div>}
           </Card>
         )}
@@ -375,7 +397,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         <Card title="Timeline">
           {p.milestones.map((m) => (
             <div key={m.label} className={`gp-ms ${dayStart(m.date) < today ? "past" : ""}`}>
-              <span>{m.emoji}</span><span>{m.label}{m.actual ? " ✓" : ""}</span>
+              <Icon name={m.icon} /><span>{m.label}{m.actual ? " ✓" : ""}</span>
               <span className="when">{fmtDate(m.date)}</span>
             </div>
           ))}
@@ -397,31 +419,32 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           <Card title="Share your grow journey">
             {grow.shared ? (<>
               <div className="gp-issue ok" style={{ marginTop: 0 }}>
-                {[grow.sharing?.followers && "👥 Your followers can follow along", grow.sharing?.training && "💚 helping train Amberly"].filter(Boolean).join(" · ")}.
+                {[grow.sharing?.followers && "Your followers can follow along", grow.sharing?.training && "Helping train Amberly"].filter(Boolean).join(". ")}.
                 New entries and photos are sent automatically when you're online.
               </div>
               <button className="tv-link" style={{ paddingLeft: 0 }} onClick={() => setSharing(true)}>Change who sees this grow</button>
             </>) : (<>
               <div className="tv-field-hint" style={{ marginBottom: 10 }}>Let followers watch this grow, and/or help train Amberly. Your nickname for the grow stays on this phone.</div>
-              <button className="tv-btn tv-btn-soft" onClick={() => setSharing(true)}>👥 Share this grow</button>
+              <button className="tv-btn tv-btn-soft" onClick={() => setSharing(true)}><Icon name="users" /> Share this grow</button>
             </>)}
           </Card>
         )}
         {sharing && <ShareSheet what="this grow" audience={grow.shared ? grow.sharing : undefined} onShare={setGrowSharing} onClose={() => setSharing(false)} />}
 
         <Card title="History">
-          {grow.logs.length === 0 ? <div className="tv-field-hint">Nothing logged yet — tap 💧 when you water.</div> :
-            [...grow.logs].reverse().slice(0, 20).map((l) => (
+          {grow.logs.length === 0 ? <div className="tv-field-hint">Nothing logged yet. Tap Watered when you water.</div> :
+            [...grow.logs].reverse().slice(0, allHistory ? undefined : 20).map((l) => (
               <div key={l.id} className="gp-row">
-                <span>{{ water: "💧 Watered", feed: "🧪 Fed", photo: "📷 Photo", env: "🌡️ Climate", note: "✏️ Note" }[l.type]}
+                <span><Icon name={l.type} size={15} /> {{ water: "Watered", feed: "Fed", photo: "Photo", env: "Climate", note: "Note" }[l.type]}
                   {l.type === "feed" && (l.ec || l.ph) ? ` · ${l.ec ? `EC ${l.ec}` : ""}${l.ph ? ` pH ${l.ph}` : ""}` : ""}
                   {l.type === "env" ? ` · ${l.temp}°F ${l.rh}%` : ""}
-                  {l.note ? ` — ${l.note}` : ""}</span>
-                <b style={{ fontWeight: 400, color: "#a4988a", whiteSpace: "nowrap" }}>
-                  {fmtDate(l.date)} <button className="tv-diary-del" onClick={() => deleteLog(l.id)} aria-label="Delete log">✕</button>
+                  {l.note ? `: ${l.note}` : ""}</span>
+                <b style={{ fontWeight: 400, color: "#766b60", whiteSpace: "nowrap" }}>
+                  {fmtDate(l.date)} <button className="gp-log-del" onClick={() => deleteLog(l)} aria-label="Delete entry">✕</button>
                 </b>
               </div>
             ))}
+          {grow.logs.length > 20 && !allHistory && <button className="tv-link" onClick={() => setAllHistory(true)}>Show all {grow.logs.length} entries</button>}
         </Card>
 
         <div className="tv-btn-row">
@@ -432,7 +455,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             save(grows.filter((g) => g.id !== grow.id)); setView({ mode: "list" });
           }}>Delete grow</button>
         </div>
-        {toast && <div className="gp-toast">{toast.msg ?? toast}{toast.undo && <button onClick={toast.undo}>Undo</button>}</div>}
+        {toast && <div className="gp-toast" role="status">{toast.msg ?? toast}{toast.undo && <button onClick={toast.undo}>Undo</button>}</div>}
       </>
     );
   }
@@ -445,12 +468,12 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
       <div className="tv-hero"><div className="tv-hero-title">My grows</div>
         <div className="tv-hero-sub">Your calendar, watering plan, and targets for every stage.</div></div>
 
-      {grows.length === 0 && <div className="tv-diary-empty"><div className="tv-diary-empty-emoji">🗓️</div>Start a grow and we'll build your whole timeline.</div>}
+      {grows.length === 0 && <div className="tv-diary-empty"><div className="tv-big-icon"><Icon name="calendar" size={36} /></div>Start a grow and we'll build your whole timeline.</div>}
       {grows.map((g) => {
         const gp = plan(g, diary.filter((e) => e.growId === g.id));
         return (
           <button key={g.id} className="tv-choice-btn" style={{ marginBottom: 12 }} onClick={() => setView({ mode: "detail", id: g.id })}>
-            <span className="tv-choice-emoji">{gp.stage.emoji}</span>
+            <Tile name={gp.stage.icon} />
             <span className="tv-choice-text">
               <span className="tv-choice-name">{g.name}</span>
               <span className="tv-choice-desc">Day {Math.max(0, gp.day)} · {gp.stage.label} · harvest ≈ {fmtDate(gp.harvestDate)}</span>
@@ -459,8 +482,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         );
       })}
       <button className="tv-btn tv-btn-primary" onClick={() => { setDraft(newGrow()); setView({ mode: "edit" }); }}><Plus size={17} /> Start a new grow</button>
-      <div className="tv-disclaimer" style={{ marginTop: 12 }}>Unlimited grows, free. Everything stays on this device.</div>
-      {toast && <div className="gp-toast">{toast.msg ?? toast}</div>}
+      <div className="tv-disclaimer" style={{ marginTop: 12 }}>Track as many grows as you like. They stay on this phone unless you share them.</div>
     </>
   );
 }

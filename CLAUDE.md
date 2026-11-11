@@ -24,6 +24,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 |---|---|
 | `src/Amberly.jsx` | Main app: welcome → strain select → Effect Dial + capture → analysis → diary. Also diary screen, share sheet hookup, About modal (account, delete data). Holds the design-system CSS (`STYLES`, `tv-*` classes). |
 | `src/GrowPlanner.jsx` | Planner UI: grow list, setup form, Today card, quick-log, 21-day strip, targets, timeline, photos, history. Reuses `tv-*` classes; extra `gp-*` CSS in `GP_STYLES`. |
+| `src/Icon.jsx` | The app's icon set (lucide line icons picked by name). `planner.js` names the icon for each stage and milestone. |
 | `src/planner.js` | Pure logic + research data, no React: `STAGES` table, `plan()`, `waterPlan()`, `feedPlan()`, `envCheck()` (VPD), `lightCheck()`, `flipHeight()`, `scanForecast()`, date helpers, `store`. |
 | `src/strain-database.json` | Starter strain list (27, curated), bundled into the app (works offline). Facts only — no third-party image links. |
 | `src/trichomes.js` | Pixel color rules (`classifyPixel`, `analyzeImage`). Tuned with `tools/calibrate.html`. |
@@ -52,6 +53,8 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 - Blob URLs are tracked in `objectUrlsRef` and revoked on reset/unmount.
 - Derived data uses `useMemo` (e.g. `filtered`), never state + effect.
 - No `alert()`; use inline UI/toasts. `window.confirm` only for destructive deletes.
+- **Navigation:** change screens in Amberly.jsx with `go(step)` / `leave(n)`, never `setStep` directly. Each screen is a browser-history entry, so Android Back and the iPhone edge swipe step back instead of closing the app.
+- **Logs:** adding or deleting a grow log shows a toast with Undo. `save()` in GrowPlanner returns false when storage is full; don't show a success message in that case.
 
 ## Trichome analysis (rule-based, on-device)
 - Pixels → HSL. **Pistil exclusion is the headline correctness rule:** orange/brown hairs are NOT amber trichomes. Pistils `H 6–40, S > 40, L 30–82` → ignored. Amber: `H 20–62, S 32–55, L 30–80`. Pixels with `S ≥ 42` that aren't amber are ignored.
@@ -79,10 +82,12 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 
 ## Design system
 Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier dark/monochrome "lab" look.
-- Background `#faf6f0`, cards `#fffdfa`, borders `#efe7dc`, text `#2b2622`, muted `#8a7f74`, single accent amber `#d99a3c` (hover `#cf8f30`, text `#b07b3e`).
-- Inter font, self-hosted via `@fontsource/inter` (no Google Fonts); 14–22px radii; soft shadows; generous whitespace; emoji as friendly icons.
+- Background `#faf6f0`, cards `#fffdfa`, borders `#efe7dc`, text `#2b2622`, muted `#766b60`, single accent amber `#d99a3c` (hover `#cf8f30`, text `#8f6128`). Amber buttons use dark ink text (`#2b2622`), not white: white on amber fails contrast.
+- Inter font, self-hosted via `@fontsource/inter` (no Google Fonts); 14–22px radii; soft shadows; generous whitespace.
+- Icons are drawn line icons from `src/Icon.jsx` (`<Icon name>`; `<Tile name>` puts one on a soft amber tile). No emoji in the interface, they look different on every phone. The only emoji are the four follower reactions.
 - Screens open with a big plain-language question ("What are you growing?").
 - Progress dots for multi-step flows. Mobile-first, must fit 320px wide with no horizontal scroll.
+- Tap targets ≥ 44px. Choices are one tap (no separate Continue button). Plain sentences in user-facing copy: no em dashes.
 - Contrast: keep secondary text ≥ 4.5:1.
 
 ## Privacy & policy decisions
@@ -98,7 +103,7 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 1. localStorage caps ~5 MB (~50–100 grow photos). App toasts when full. Next: Capacitor Filesystem.
 2. Reminder notifications (Capacitor Local Notifications) — top competitor-loved feature.
 3. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
-4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). Before launch: pin `connect-src`/`img-src` in `vercel.json` to the real Supabase project URL, and turn on Supabase CAPTCHA.
+4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). `connect-src`/`img-src` in `vercel.json` are pinned to the one Supabase project (change them if the project ever moves). Before launch: turn on Supabase CAPTCHA.
 5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list.
 6. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
 

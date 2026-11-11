@@ -16,11 +16,10 @@ class CrashScreen extends React.Component {
     if (!this.state.crashed) return this.props.children;
     return (
       <div style={{ fontFamily: "Inter, sans-serif", background: "#faf6f0", color: "#2b2622", minHeight: "100vh", padding: "64px 24px", textAlign: "center" }}>
-        <div style={{ fontSize: 40 }}>🫙</div>
-        <h1 style={{ fontSize: 22, margin: "12px 0 8px" }}>Something went wrong</h1>
+        <h1 style={{ fontSize: 22, margin: "0 0 8px" }}>Something went wrong</h1>
         <p style={{ color: "#6f6458", marginBottom: 20 }}>Your grows and diary are still saved on this device.</p>
         <button onClick={() => window.location.reload()}
-          style={{ background: "#d99a3c", color: "#fff", border: "none", borderRadius: 16, padding: "14px 28px", fontSize: 16, fontWeight: 600 }}>
+          style={{ background: "#d99a3c", color: "#2b2622", border: "none", borderRadius: 16, padding: "14px 28px", fontSize: 16, fontWeight: 600 }}>
           Reload Amberly
         </button>
       </div>

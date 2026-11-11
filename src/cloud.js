@@ -37,8 +37,11 @@ const check = ({ error }) => {
   if (!error) return;
   if (error.code === "23505") throw new Error("That username is taken. Try another.");
   if (/row-level security/i.test(error.message || "")) throw new Error("Amberly couldn't do that. If you've shared or reported a lot today, try again tomorrow.");
-  const offline = /fetch|network|failed to/i.test(error.message || "");
-  throw new Error(offline ? "Couldn't reach Amberly's server. Check your connection and try again." : error.message);
+  const msg = error.message || "";
+  if (/fetch|network|failed to/i.test(msg)) throw new Error("Couldn't reach Amberly's server. Check your connection and try again.");
+  if (error.status === 429 || /rate limit|security purposes/i.test(msg)) throw new Error("Too many tries. Wait a minute, then try again.");
+  if (/expired|invalid/i.test(msg)) throw new Error("That code didn't work. Check it, or send a new one.");
+  throw new Error("Something went wrong. Please try again."); // never show raw server text
 };
 // The signed-in user plus the client, for every call that needs an account.
 const session = async () => {
@@ -58,7 +61,7 @@ export const onUserChange = (cb) => { listeners.add(cb); return () => listeners.
 export const sendCode = async (email, termsVersion) =>
   check(await (await client()).auth.signInWithOtp({ email, options: { shouldCreateUser: true, data: { terms_version: termsVersion, confirmed_21_plus: true } } }));
 export const verifyCode = async (email, token) => check(await (await client()).auth.verifyOtp({ email, token, type: "email" }));
-export const signOut = async () => { await (await client()).auth.signOut(); };
+export const signOut = async () => check(await (await client()).auth.signOut());
 
 // ── Profile (username + privacy) ─────────────────────────────────────────────
 export async function myProfile() {
@@ -223,8 +226,8 @@ export async function unshare(column, values) {
 // Share a grow's setup plus any journal entries not uploaded yet, with the grow's
 // audience. Returns uploaded log ids so the caller can mark them synced.
 export async function syncGrow(grow) {
-  const { logs, id, author, shared, sharing, name, ...setup } = grow; // nickname stays on the phone
-  const audience = sharing || { training: true }; // grows shared before the two switches existed
+  const { logs, id, author, shared, sharing: audience, name, ...setup } = grow; // nickname stays on the phone
+  if (!audience) return []; // no saved choice: nothing leaves the phone
   await shareItem({ kind: "grow", localId: id, growLocalId: id, data: setup, audience });
   const uploaded = [];
   for (const { photo, synced, author: _a, shared: _s, ...log } of logs) {
