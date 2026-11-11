@@ -5,6 +5,7 @@ import GrowPlanner from "./GrowPlanner.jsx";
 import { store, GROWS_KEY } from "./planner.js";
 import { analyzeImage } from "./trichomes.js";
 import LegalGate, { hasConsent, CONSENT_KEY } from "./LegalGate.jsx";
+import InstallTip, { INSTALL_KEY } from "./InstallTip.jsx";
 import STRAIN_DB from "./strain-database.json";
 import ShareSheet, { useCloudUser } from "./ShareSheet.jsx";
 const Community = lazy(() => import("./Social.jsx")); // loaded only when someone opens Following
@@ -354,6 +355,23 @@ const STYLES = `
   .tv-banner-name { font-size: 16px; font-weight: 600; color: #2b2622; letter-spacing: -0.01em; }
   .tv-banner-meta { font-size: 13px; color: #766b60; margin-top: 2px; }
 
+  /* ── "KEEP AMBERLY ON YOUR HOME SCREEN" CARD ── */
+  .tv-install {
+    position: relative; margin-top: 16px; padding: 16px;
+    background: #fff8ee; border: 1px solid #f0e0c6; border-radius: 16px;
+  }
+  .tv-install-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; padding-right: 32px; }
+  .tv-install p { font-size: 14px; line-height: 1.5; color: #766b60; margin-top: 6px; }
+  .tv-install ol { margin: 10px 0 0 20px; font-size: 15px; line-height: 1.5; }
+  .tv-install li { padding: 3px 0; }
+  .tv-install li svg { color: #8f6128; }
+  .tv-install .tv-btn { margin-top: 12px; }
+  .tv-install-x {
+    position: absolute; top: 0; right: 0; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; color: #766b60; cursor: pointer;
+  }
+
   /* ── EFFECT DIAL ── */
   .tv-dial { display: flex; flex-direction: column; gap: 10px; }
   .tv-dial-opt {
@@ -363,7 +381,7 @@ const STYLES = `
     display: flex; align-items: center; gap: 14px;
   }
   .tv-dial-opt:hover { border-color: #e0cdb0; }
-  .tv-dial-opt.active { border-color: #d99a3c; background: #fff8ee; }
+  .tv-dial-opt.active { border-color: #d99a3c; background: #fff8ee; }
   .tv-dial-text { flex: 1; }
   .tv-dial-label { display: block; font-size: 16px; font-weight: 600; color: #2b2622; letter-spacing: -0.01em; }
   .tv-dial-blurb { display: block; font-size: 13px; color: #766b60; margin-top: 2px; }
@@ -376,7 +394,7 @@ const STYLES = `
     background: #fffdfa; padding: 38px 22px; text-align: center; cursor: pointer;
     transition: border-color 0.18s, background 0.18s;
   }
-  .tv-upload:hover { border-color: #d99a3c; background: #fff8ee; }
+  .tv-upload:hover { border-color: #d99a3c; background: #fff8ee; }
   .tv-upload-text { font-size: 16px; font-weight: 600; color: #2b2622; }
   .tv-upload-hint { font-size: 13.5px; color: #766b60; margin-top: 6px; line-height: 1.5; }
 
@@ -404,7 +422,7 @@ const STYLES = `
   .tv-fill-amber { background: #d99a3c; }
 
   /* ── RECOMMENDATION CARD ── */
-  .tv-rec { border-radius: 20px; padding: 26px; margin-bottom: 14px; border: 1.5px solid; }
+  .tv-rec { border-radius: 20px; padding: 26px; margin-bottom: 14px; border: 1.5px solid; }
   .tv-rec-stage { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: #2b2622; }
   .tv-rec-timing { font-size: 14px; font-weight: 600; margin-top: 4px; margin-bottom: 16px; }
   .tv-rec-note { font-size: 15px; color: #4a4138; line-height: 1.55; }
@@ -477,7 +495,7 @@ const STYLES = `
   /* ── DIARY ── */
   .tv-diary-empty {
     text-align: center; padding: 40px 20px; color: #766b60;
-  }
+  }
   .tv-diary-entry {
     background: #fffdfa; border: 1px solid #efe7dc; border-radius: 18px;
     padding: 16px; margin-bottom: 12px; display: flex; gap: 14px;
@@ -914,7 +932,7 @@ export default function Amberly() {
   const deleteAllData = () => {
     if (!window.confirm("Delete all your grows, diary entries, photos, and settings from this device? This can't be undone."
       + (cloudUser ? "\n\nThings you've shared stay with BeakerBoys until you delete your account." : ""))) return;
-    [LEGACY_PREFS_KEY, DIARY_KEY, GROWS_KEY, CONSENT_KEY, AUTH_KEY].forEach(store.remove);
+    [LEGACY_PREFS_KEY, DIARY_KEY, GROWS_KEY, CONSENT_KEY, AUTH_KEY, INSTALL_KEY].forEach(store.remove);
     window.location.reload();
   };
 
@@ -997,6 +1015,8 @@ export default function Amberly() {
                   <Icon name="book" /> My grow diary ({diary.length})
                 </button>
               )}
+
+              <InstallTip />
 
               <div style={{ textAlign: "center", marginTop: 14 }}>
                 <button className="tv-link" onClick={() => setShowAbout(true)}>About</button>

@@ -1,7 +1,7 @@
 import {
   Sprout, Sun, CalendarDays, Users, BookOpen, Leaf, Zap, Scale, Moon, Camera, Search, CircleCheck,
   Hourglass, Droplet, FlaskConical, Thermometer, Pencil, Microscope, Scissors, Lightbulb, Flower,
-  Flower2, Bean, TreeDeciduous, Wind, Amphora, Trophy, ShowerHead,
+  Flower2, Bean, TreeDeciduous, Wind, Amphora, Trophy, ShowerHead, Share, SquarePlus, X,
 } from "lucide-react";
 
 // The app's one icon set: drawn line icons instead of emoji, so every phone shows the same thing.
@@ -13,6 +13,7 @@ const ICONS = {
   water: Droplet, feed: FlaskConical, photo: Camera, env: Thermometer, note: Pencil,
   microscope: Microscope, scissors: Scissors, bulb: Lightbulb, flower: Flower, flower2: Flower2,
   bean: Bean, tree: TreeDeciduous, wind: Wind, jar: Amphora, trophy: Trophy, shower: ShowerHead,
+  share: Share, add: SquarePlus, close: X,
 };
 
 export default function Icon({ name, size = 18 }) {
