@@ -13,7 +13,7 @@ $99/year (Apple). Everything else can stay free.
 ## Phase 1 — Run it on your PC (Day 1, ~1 hour)
 
 1. Install Node.js LTS (nodejs.org).
-2. Open the `amberly-v10` folder in a terminal: `npm install`, then `npm run dev`.
+2. Open the folder `C:\Users\smith\Amberly` in a terminal: `npm install`, then `npm run dev`.
 3. Open the printed address on your PC, then the `Network:` address on your iPhone (same Wi-Fi).
 4. Set up one real grow in the planner and log a few waterings.
 
@@ -25,6 +25,8 @@ The fastest way to real feedback. A web app installs on any phone with no store 
 
 1. Make a free GitHub account; create a **private** repo; upload the folder (or use GitHub Desktop).
 2. Make a free Vercel account → "Add New Project" → pick the repo → Deploy. You get a link.
+   The live alpha is at https://amberly-coral.vercel.app (Vercel, from GitHub `main`).
+   Steps: `docs/SETUP.md`.
 3. Testers open the link on iPhone → Share → **Add to Home Screen**. It launches like an app.
 4. Recruit **15–20 growers** you trust (r/autoflowers and r/microgrowery DMs, local grow shop,
    friends). Aim high: some will drift away, and Google's later step needs 12 who stay.
@@ -42,8 +44,8 @@ These are the things reviewers check, plus one storage limit that will bite real
 |---|---|
 | **Move photos off `localStorage`** to on-device file storage (Capacitor Filesystem/Preferences) | Browser storage caps around 5 MB — roughly 50–100 grow photos. The app already warns when full. |
 | **Add watering/feeding reminder notifications** (Capacitor Local Notifications) | Users' #1 loved feature in competitor apps, and it proves to Apple this is a real app, not a wrapped website (Apple's "minimum functionality" rule, 4.2). |
-| **21+ confirmation on first launch** + local-law notice | Matches the age rating you'll declare; already have the notice text. |
-| **Privacy policy + terms** page (free generators exist; host on your Vercel site) | Both stores require a privacy policy URL. Say plainly: data stays on device; shared items are opt-in and anonymous. |
+| **21+ confirmation on first launch** + local-law notice (done: `LegalGate.jsx`) | Matches the age rating you will declare. |
+| **Privacy policy + terms** pages (done: `public/privacy.html`, `public/terms.html`, hosted on Vercel) | Both stores require a privacy policy URL. Keep the pages true to the app: without an account, data stays on the device. Sharing is opt-in and needs an account. Followers see the username. Training use is a separate switch. |
 | **Real app icon** (designer on Fiverr ~$30–80, or refine the placeholder) | First impression in the store. |
 | **No buying, selling, or shop links** of any cannabis product | Both stores' red line (details in Phase 6). |
 
@@ -96,11 +98,14 @@ Capacitor wraps your existing web app in a real iOS/Android shell — same code,
    (Today card, trichome reading, timeline, calendar strip, climate check).
 2. Age rating questionnaire: answer drug-reference questions honestly → expect the **highest**
    (adults-only) rating on both stores.
-3. Privacy: Apple "App Privacy" labels and Google "Data safety" form — today that's *no data
-   collected*, since everything is on-device.
+3. Privacy: Apple "App Privacy" labels and Google "Data safety" form. Without an account, all
+   data stays on the device. When a user signs in and shares, the app stores this data
+   (Supabase): email, username, shared photos and grow data, follows, reactions, reports and
+   blocks. Cloudflare Turnstile runs at sign-in. Declare all of this.
 4. **Reviewer notes** (this matters most): *"Amberly is a horticultural planning and journaling tool
    for adults growing where home cultivation is legal. It contains no sales, ordering, delivery, or
-   links to purchase cannabis. All data stays on the device."*
+   links to purchase cannabis. Without an account, all data stays on the device. Sharing is
+   optional and needs an email sign-in. Account deletion is in About, then Account."*
 5. If rejected: read the exact guideline cited, fix that one thing, reply in Resolution Center — first
    rejections are common and usually quick to resolve.
 
@@ -108,10 +113,10 @@ Capacitor wraps your existing web app in a real iOS/Android shell — same code,
 
 ## Phase 7 — After launch (ongoing)
 
-1. **Backend** (Supabase/Firebase) for accounts, the anonymous shared-readings pool, and the
-   community feed — the data model is already shaped for it (`author`, `shared`, `id`, timestamps).
-2. Once accounts exist, Apple requires **in-app account deletion** (guideline 5.1.1(v)) — build it in from day one.
-3. Use opted-in shared photos to train the Phase 2 trichome model.
+1. **Backend** (done): Supabase gives accounts, sharing and following. Next: optional cloud
+   backup and multi-device sync. Keep backups out of training data.
+2. **In-app account deletion** (Apple guideline 5.1.1(v)) is done: About, then Account.
+3. Use photos that users share with the training switch on to train the Phase 2 trichome model.
 4. Pricing per the research: generous free tier, **no plant caps** (competitors' #1 complaint), a cheap
    middle tier (~$3/month) for cloud backup, extra analytics, and brand feeding presets.
 

@@ -86,7 +86,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   const save = useCallback((next) => {
     const ok = store.set(GROWS_KEY, next);
     if (ok) setGrows(next); // what's on screen is always what's saved
-    else setToast("Storage is full. Delete old photos to keep saving.");
+    else setToast("Storage is full. Delete old photos to save more.");
     return ok;
   }, []);
   // toast: a message, or { msg, undo } — Undo toasts stay up a little longer.
@@ -139,7 +139,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
     }
     await unshare("grow_local_id", [grow.id]);
     updateGrow({ shared: false, sharing: null, logs: grow.logs.map(({ synced, ...l }) => l) });
-    setToast("Stopped sharing. The shared copy was deleted.");
+    setToast("Sharing stopped. The shared copy is deleted.");
   };
   // Deleting an entry can be undone; a restored entry is sent again if the grow is shared.
   const deleteLog = ({ synced, ...log }) => {
@@ -156,7 +156,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
   useEffect(() => {
     if (!cloudEnabled || !pending) return;
     const send = () => pushGrow(growsRef.current.find((g) => g.id === grow.id))
-      .catch(() => setToast("Couldn't update the shared copy. We'll try again next time."));
+      .catch(() => setToast("The shared copy did not update. We will try again later."));
     if (navigator.onLine) send();
     window.addEventListener("online", send);
     return () => window.removeEventListener("online", send);
@@ -170,11 +170,12 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
     e.target.value = "";
     if (!file) return;
     try { addLog("photo", { photo: await fileToThumb(file) }, "Photo added"); }
-    catch (err) { setToast(err?.message || "Couldn't read that photo"); }
+    catch (err) { setToast(err?.message || "The app cannot read that photo"); }
   };
 
   const set = (k) => (v) => setDraft((d) => ({ ...d, [k]: v }));
   const field = (k) => ({ value: draft[k] ?? "", onChange: (e) => set(k)(e.target.value) });
+  const toastEl = toast && <div className="gp-toast" role="status">{toast.msg ?? toast}{toast.undo && <button onClick={toast.undo}>Undo</button>}</div>;
 
   // ═══════════════ SETUP / EDIT ═══════════════
   if (view.mode === "edit" && draft) {
@@ -187,21 +188,21 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         editedAt: new Date().toISOString(),                  // lets a shared grow send the new setup
       };
       // Editing only changes the setup: keep the latest logs and sharing state.
-      save(grows.some((x) => x.id === g.id)
+      // If storage is full, stay on the form so the answers are not lost.
+      if (save(grows.some((x) => x.id === g.id)
         ? grows.map((x) => (x.id === g.id ? { ...g, logs: x.logs, shared: x.shared, sharing: x.sharing } : x))
-        : [g, ...grows]);
-      setView({ mode: "detail", id: g.id });
+        : [g, ...grows])) setView({ mode: "detail", id: g.id });
     };
     return (
       <>
         <style>{GP_STYLES}</style>
         <button className="tv-back" onClick={() => setView(grow ? { mode: "detail", id: grow.id } : { mode: "list" })}><ArrowLeft size={17} /> Back</button>
         <div className="tv-hero"><div className="tv-hero-title">{grows.some((x) => x.id === draft.id) ? "Edit grow" : "Start a grow"}</div>
-          <div className="tv-hero-sub">A few taps and we'll build your calendar.</div></div>
+          <div className="tv-hero-sub">Tap a few answers. The app builds your calendar.</div></div>
 
         <Card>
           <label className="tv-field-label">Strain</label>
-          <input className="tv-input" list="gp-strains" placeholder="e.g. Gorilla Cookies Auto" {...field("strainName")} />
+          <input className="tv-input" list="gp-strains" placeholder="Example: Gorilla Cookies Auto" {...field("strainName")} />
           <datalist id="gp-strains">{strainNames.map((n) => <option key={n} value={n} />)}</datalist>
           <div className="gp-label">Plant type</div>
           <Seg value={draft.plantType} onChange={set("plantType")} options={[["auto", "Autoflower"], ["photo", "Photoperiod"]]} />
@@ -214,7 +215,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             <div className="gp-label">Light schedule</div>
             <Seg value={draft.lightSchedule} onChange={set("lightSchedule")} options={[["18/6", "18/6 (default)"], ["20/4", "20/4 (push)"]]} />
           </>) : (<>
-            <div className="gp-label">Weeks of veg before flipping</div>
+            <div className="gp-label">Weeks of veg before the flip</div>
             <Seg value={+draft.vegWeeks} onChange={set("vegWeeks")} options={[[3, "3"], [4, "4"], [6, "6"], [8, "8"]]} />
           </>)}
           <div className="gp-label">Germination date</div>
@@ -223,7 +224,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
 
         <Card title="Your setup">
           <Seg value={draft.location} onChange={set("location")} options={[["indoor", "Indoor"], ["outdoor", "Outdoor"]]} />
-          <div className="gp-label">Growing medium</div>
+          <div className="gp-label">Grow medium</div>
           <Seg value={draft.medium} onChange={set("medium")} options={[["soil", "Soil"], ["coco", "Coco"], ["hydro", "Hydro"]]} />
           {draft.medium !== "hydro" && (<>
             <div className="gp-label">Pot size (gallons)</div>
@@ -239,7 +240,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             </div>
           </>)}
           <button type="button" role="switch" aria-checked={Boolean(draft.roWater)} className="tv-toggle-row" style={{ marginTop: 14, marginBottom: 0 }} onClick={() => set("roWater")(!draft.roWater)}>
-            <div className="tv-toggle-text"><div className="tv-toggle-label">Using RO or very soft water</div><div className="tv-toggle-desc">We'll remind you about Cal-Mag.</div></div>
+            <div className="tv-toggle-text"><div className="tv-toggle-label">I use RO or very soft water</div><div className="tv-toggle-desc">The app reminds you about Cal-Mag.</div></div>
             <div className={`tv-switch ${draft.roWater ? "on" : ""}`}><div className="tv-switch-knob" /></div>
           </button>
         </Card>
@@ -249,11 +250,12 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           <div className="gp-label">Flush before harvest? <span className="tv-field-hint">(optional, experts disagree)</span></div>
           <Seg value={+draft.flush} onChange={set("flush")} options={[[0, "No flush"], [7, "7 days"], [14, "14 days"]]} />
           <div className="gp-label">Nickname <span className="tv-field-hint">(optional)</span></div>
-          <input className="tv-input" placeholder="e.g. Tent A – left" {...field("name")} />
+          <input className="tv-input" placeholder="Example: Tent A – left" {...field("name")} />
         </Card>
 
         <button className="tv-btn tv-btn-primary" onClick={commit}>Build my plan</button>
-        <div className="tv-disclaimer" style={{ marginTop: 12 }}>Home growing is legal only in some places. Check your local laws.</div>
+        <div className="tv-disclaimer" style={{ marginTop: 12 }}>Growing at home is legal only in some places. Check your local laws.</div>
+        {toastEl}
       </>
     );
   }
@@ -294,9 +296,9 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
 
         {/* TODAY — reminders carry the exact payload (amount, EC, pH) */}
         <Card title="Today">
-          {w.hydro ? <Row k="Reservoir" v="Top off; full change every 7–14 days" /> : growing && (<>
-            <Row k={overdue ? "Water" : "Next water"} v={overdue ? (w.last ? "Due now" : "When top inch is dry") : relDay(w.next)} />
-            <Row k="Amount" v={`~${w.liters.toFixed(1)} L (${w.gal.toFixed(1)} gal)${p.stageKey === "seedling" ? ", ring around stem" : ""}`} />
+          {w.hydro ? <Row k="Reservoir" v="Add water. Change all of it every 7–14 days" /> : growing && (<>
+            <Row k={overdue ? "Water" : "Next water"} v={overdue ? (w.last ? "Due now" : "When the top inch is dry") : relDay(w.next)} />
+            <Row k="Amount" v={`~${w.liters.toFixed(1)} L (${w.gal.toFixed(1)} gal)${p.stageKey === "seedling" ? ", in a ring around the stem" : ""}`} />
             <Row k="This watering" v={w.feedNext && f?.ec[1] ? "Feed" : "Plain water"} />
           </>)}
           {f && f.ec[1] > 0 && (<>
@@ -304,7 +306,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             <Row k="pH" v={f.ph} />
           </>)}
           {f && <div className="tv-tip">{f.focus} {f.strength}{f.calmag && <><br />{f.calmag}</>}</div>}
-          {!w.hydro && growing && <div className="tv-field-hint" style={{ marginTop: 10 }}>Always double-check: water when the pot feels light or the top inch is dry. We learn your rhythm from your logs.</div>}
+          {!w.hydro && growing && <div className="tv-field-hint" style={{ marginTop: 10 }}>Check the pot first. Water when the pot feels light or the top inch is dry. The app learns your rhythm from your logs.</div>}
         </Card>
 
         <div className="gp-quick">
@@ -326,7 +328,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
               <input className="tv-input" type="number" inputMode="decimal" min="30" max="120" placeholder="Temp °F" value={sheet.temp} onChange={(e) => setSheet({ ...sheet, temp: e.target.value })} />
               <input className="tv-input" type="number" inputMode="decimal" min="1" max="100" placeholder="Humidity %" value={sheet.rh} onChange={(e) => setSheet({ ...sheet, rh: e.target.value })} />
             </div>}
-            {sheet.type !== "env" && <textarea className="tv-textarea" placeholder={sheet.type === "feed" ? "What did you feed? (e.g. Big Bloom 3 tsp/gal)" : "What's happening?"} value={sheet.note} onChange={(e) => setSheet({ ...sheet, note: e.target.value })} style={{ marginBottom: 10 }} />}
+            {sheet.type !== "env" && <textarea className="tv-textarea" placeholder={sheet.type === "feed" ? "What did you feed? Example: Big Bloom 3 tsp/gal" : "Write your note"} value={sheet.note} onChange={(e) => setSheet({ ...sheet, note: e.target.value })} style={{ marginBottom: 10 }} />}
             <div className="tv-btn-row" style={{ marginTop: 0 }}>
               <button className="tv-btn tv-btn-soft" onClick={() => setSheet(null)}>Cancel</button>
               <button className="tv-btn tv-btn-primary"
@@ -351,12 +353,12 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         {(p.scanTime || p.flowering) && !grow.harvestDate && (
           <div className="tv-btn-row" style={{ marginTop: 0, marginBottom: 14 }}>
             <button className="tv-btn tv-btn-primary" onClick={() => onScan(grow)}><Icon name="microscope" /> Scan trichomes</button>
-            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => markToday("harvestDate", "Harvest logged. Drying plan started.")}><Icon name="scissors" /> I harvested</button>}
+            {p.scanTime && <button className="tv-btn tv-btn-soft" onClick={() => markToday("harvestDate", "Harvest logged. The drying plan starts.")}><Icon name="scissors" /> I harvested</button>}
           </div>
         )}
         {p.forecast?.last && (
           <div className={`gp-issue ${p.forecast.ready ? "ok" : "warn"}`} style={{ marginTop: 0, marginBottom: 14 }}>
-            Last scan: {p.forecast.last.a}% amber. {p.forecast.ready ? "You've reached your target. The harvest window is open." : p.forecast.date ? `At this pace you'll hit your target around ${fmtDate(p.forecast.date)}.` : "Scan again in 2–3 days to project your harvest date."}
+            Last scan: {p.forecast.last.a}% amber. {p.forecast.ready ? "You reached your target. The harvest window is open." : p.forecast.date ? `At this pace, you will reach your target near ${fmtDate(p.forecast.date)}.` : "Scan again in 2–3 days. The app then shows your harvest date."}
           </div>
         )}
 
@@ -368,7 +370,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
               </div>
             ))}
           </div>
-          <div className="tv-field-hint" style={{ marginTop: 8 }}>Solid = done · faded = planned</div>
+          <div className="tv-field-hint" style={{ marginTop: 8 }}>Solid means done. Faded means planned.</div>
         </Card>
 
         <Card title={`${st.label} targets`}>
@@ -381,16 +383,16 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           {envRes && (<>
             <div className="gp-label">Last climate check ({relDay(env.date)}): {env.temp}°F · {env.rh}% · VPD {envRes.vpd.toFixed(2)}</div>
             {envRes.issues.length ? envRes.issues.map(([lvl, m]) => <div key={m} className={`gp-issue ${lvl}`}>{m}</div>)
-              : <div className="gp-issue ok">Right in the zone.</div>}
+              : <div className="gp-issue ok">All values are in the target range.</div>}
           </>)}
         </Card>
 
         {(fh || lc || grow.location === "outdoor") && (
           <Card title="Setup check">
-            {fh && <Row k="Flip when plant is about" v={`${fh} in tall`} />}
-            {fh && <div className="tv-field-hint" style={{ marginBottom: 8 }}>Plants stretch {grow.genetics === "indica" ? "~1.5×" : grow.genetics === "sativa" ? "2–3×" : "~2×"} after the flip. This keeps the tops clear of your light.</div>}
+            {fh && <Row k="Flip when the plant is" v={`about ${fh} in tall`} />}
+            {fh && <div className="tv-field-hint" style={{ marginBottom: 8 }}>After the flip, plants grow to {grow.genetics === "indica" ? "~1.5×" : grow.genetics === "sativa" ? "2–3×" : "~2×"} their height. This keeps the tops away from your light.</div>}
             {lc && <div className={`gp-issue ${lc.ok ? "ok" : "warn"}`}>{lc.wpsf} watts per sq ft. {lc.msg}</div>}
-            {grow.location === "outdoor" && !auto && <div className="gp-issue warn">Outdoors, photoperiods start flowering when days shorten (≈ late July–August at mid-latitudes). Tap "I flipped" when you see pistils. Watch frost dates near harvest.</div>}
+            {grow.location === "outdoor" && !auto && <div className="gp-issue warn">Outdoors, photoperiods start to flower when days get shorter (about late July–August at mid-latitudes). When you see pistils, tap "I flipped to 12/12 today". Check the frost dates near harvest.</div>}
           </Card>
         )}
 
@@ -419,12 +421,12 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
           <Card title="Share your grow journey">
             {grow.shared ? (<>
               <div className="gp-issue ok" style={{ marginTop: 0 }}>
-                {[grow.sharing?.followers && "Your followers can follow along", grow.sharing?.training && "Helping train Amberly"].filter(Boolean).join(". ")}.
-                New entries and photos are sent automatically when you're online.
+                {[grow.sharing?.followers && "Your followers can see this grow", grow.sharing?.training && "Your grow helps train Amberly"].filter(Boolean).join(". ")}.
+                The app sends new entries and photos when you are online.
               </div>
               <button className="tv-link" style={{ paddingLeft: 0 }} onClick={() => setSharing(true)}>Change who sees this grow</button>
             </>) : (<>
-              <div className="tv-field-hint" style={{ marginBottom: 10 }}>Let followers watch this grow, and/or help train Amberly. Your nickname for the grow stays on this phone.</div>
+              <div className="tv-field-hint" style={{ marginBottom: 10 }}>Let followers see this grow. You can also help train Amberly. Your nickname for the grow stays on this device.</div>
               <button className="tv-btn tv-btn-soft" onClick={() => setSharing(true)}><Icon name="users" /> Share this grow</button>
             </>)}
           </Card>
@@ -432,7 +434,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         {sharing && <ShareSheet what="this grow" audience={grow.shared ? grow.sharing : undefined} onShare={setGrowSharing} onClose={() => setSharing(false)} />}
 
         <Card title="History">
-          {grow.logs.length === 0 ? <div className="tv-field-hint">Nothing logged yet. Tap Watered when you water.</div> :
+          {grow.logs.length === 0 ? <div className="tv-field-hint">No entries yet. When you water, tap Watered.</div> :
             [...grow.logs].reverse().slice(0, allHistory ? undefined : 20).map((l) => (
               <div key={l.id} className="gp-row">
                 <span><Icon name={l.type} size={15} /> {{ water: "Watered", feed: "Fed", photo: "Photo", env: "Climate", note: "Note" }[l.type]}
@@ -455,7 +457,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
             save(grows.filter((g) => g.id !== grow.id)); setView({ mode: "list" });
           }}>Delete grow</button>
         </div>
-        {toast && <div className="gp-toast" role="status">{toast.msg ?? toast}{toast.undo && <button onClick={toast.undo}>Undo</button>}</div>}
+        {toastEl}
       </>
     );
   }
@@ -468,7 +470,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
       <div className="tv-hero"><div className="tv-hero-title">My grows</div>
         <div className="tv-hero-sub">Your calendar, watering plan, and targets for every stage.</div></div>
 
-      {grows.length === 0 && <div className="tv-diary-empty"><div className="tv-big-icon"><Icon name="calendar" size={36} /></div>Start a grow and we'll build your whole timeline.</div>}
+      {grows.length === 0 && <div className="tv-diary-empty"><div className="tv-big-icon"><Icon name="calendar" size={36} /></div>Start a grow. The app builds your whole timeline.</div>}
       {grows.map((g) => {
         const gp = plan(g, diary.filter((e) => e.growId === g.id));
         return (
@@ -482,7 +484,7 @@ export default function GrowPlanner({ diary, strainNames, openId, onScan, onBack
         );
       })}
       <button className="tv-btn tv-btn-primary" onClick={() => { setDraft(newGrow()); setView({ mode: "edit" }); }}><Plus size={17} /> Start a new grow</button>
-      <div className="tv-disclaimer" style={{ marginTop: 12 }}>Track as many grows as you like. They stay on this phone unless you share them.</div>
+      <div className="tv-disclaimer" style={{ marginTop: 12 }}>Add as many grows as you like. They stay on this device unless you share them.</div>
     </>
   );
 }

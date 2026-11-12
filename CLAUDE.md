@@ -76,7 +76,7 @@ Stack: React 18 + Vite 7, lucide-react icons, vite-plugin-pwa (offline service w
 - **Real events override estimates:** "I flipped / first pistils", "I harvested" buttons re-time everything (competitor complaint: apps that assume the flip).
 - Watering: base interval by medium/pot, ×0.75 in stretch/mid flower, then blended 50/50 with the median of the user's last 5 logged gaps. Volume ≈ 30% of pot (12% for seedlings, ring-watered). Soil feeds every other watering; coco every watering.
 - Feeding: brand-neutral phases with EC/ppm (×500) and pH; default ½ chart strength, autos ¼–½; Cal-Mag reminder for coco or RO water.
-- VPD: Tetens, LED leaf offset −1.5 °C. Warn: > 85 °F, < 60 °F, flower RH > stage max (bad if > 60%), VPD outside stage band, danger < 0.4 or > 1.6 kPa.
+- VPD: Tetens, LED leaf offset −1.5 °C. Warn: > 85 °F, < 60 °F, flower RH > stage max + 5 (bad if > 60%), VPD outside stage band ± 0.1, danger < 0.4 or > 1.6 kPa.
 - Flip height = (tent − 12" hanger − 18" light gap − pot height) ÷ stretch (indica 1.5, hybrid 2, sativa 2.5).
 - Light check: watts ÷ sq ft (< 20 under-lit, 20–30 adequate, 30–50 strong, > 50 dim it).
 - Contested practices are user **choices**, not rules: auto 18/6 vs 20/4, flush none/7/14, day-21 defoliation.
@@ -89,6 +89,7 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 - Screens open with a big plain-language question ("What are you growing?").
 - Progress dots for multi-step flows. Mobile-first, must fit 320px wide with no horizontal scroll.
 - Tap targets ≥ 44px. Choices are one tap (no separate Continue button). Plain sentences in user-facing copy: no em dashes.
+- **Wording follows ASD-STE100 (Simplified Technical English):** short sentences (instructions ≤ 20 words, descriptions ≤ 25), one instruction per sentence, active voice, simple tenses, no contractions, no idioms or slang, and one word for one thing (photo, device, tap, delete, reading, grow). Applies to the app, the legal pages, and `docs/SETUP.md`. Legal clauses that carry risk (disclaimers, liability, licence, indemnity) keep their original wording.
 - Contrast: keep secondary text ≥ 4.5:1.
 
 ## Privacy & policy decisions

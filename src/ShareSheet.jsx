@@ -23,11 +23,11 @@ export function ProfileFields({ value, onChange }) {
   const ok = USERNAME_RULE.test(value.username);
   return (<>
     <label className="tv-field-label">Username</label>
-    <input className="tv-input" autoCapitalize="none" autoCorrect="off" placeholder="e.g. tent_wizard" maxLength={20}
+    <input className="tv-input" autoCapitalize="none" autoCorrect="off" placeholder="Example: tent_wizard" maxLength={20}
       value={value.username} onChange={(e) => onChange({ ...value, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "") })} />
-    <div className="tv-field-hint" style={{ margin: "6px 0 12px" }}>{value.username && !ok ? "3–20 letters, numbers, or _" : "Followers see this. Don't use your real name."}</div>
+    <div className="tv-field-hint" style={{ margin: "6px 0 12px" }}>{value.username && !ok ? "3–20 letters, numbers, or _" : "Followers see this. Do not use your real name."}</div>
     <Switch on={value.is_public} label="Public profile"
-      desc={value.is_public ? "Anyone who finds you can follow without asking." : "Off: you approve each follower (recommended)."}
+      desc={value.is_public ? "Anyone who finds you can follow without asking." : "Off: you approve each follower. We recommend this."}
       onToggle={() => onChange({ ...value, is_public: !value.is_public })} />
   </>);
 }
@@ -62,7 +62,7 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
 
   const run = (fn) => async () => {
     setBusy(true); setError("");
-    try { await fn(); } catch (e) { setError(e.message || "Something went wrong. Try again."); }
+    try { await fn(); } catch (e) { setError(e.message || "An error occurred. Try again."); }
     setBusy(false);
   };
   // Wrapping the fields in a form lets the keyboard's Go/Done key submit. preventDefault keeps the page from reloading.
@@ -83,17 +83,19 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
         <div className="tv-modal-pad">
           <div className="tv-modal-title">{onShare ? `Share ${what}` : "Sign in to Amberly"}</div>
 
-          {!user ? (<>
+          {user === undefined ? (
+            <div className="tv-field-hint">Loading…</div>
+          ) : !user ? (<>
             <p className="tv-field-hint" style={{ marginBottom: 12 }}>
               {onShare ? "Sharing needs a simple account. " : "This is optional. Amberly works fully without an account. "}
-              {codeSent ? `We sent a 6-digit code to ${email.trim()}. It can take a minute, so check spam too.` : "Just your email, no password. We'll email you a 6-digit code."}
+              {codeSent ? `We sent a 6-digit code to ${email.trim()}. It can take 1 minute. Also look in your spam folder.` : "You need only your email. You do not need a password. We will email you a 6-digit code."}
             </p>
             {!codeSent ? (
               <form onSubmit={submit(sendTo)}>
                 <input className="tv-input" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" placeholder="you@example.com" aria-label="Email"
                   value={email} onChange={(e) => setEmail(e.target.value)} style={{ marginBottom: 12 }} />
                 <button className="tv-btn tv-btn-primary" disabled={busy || waiting || !/^\S+@\S+\.\S+$/.test(email.trim())}>
-                  {busy ? "Sending…" : waiting && pass !== null ? "Checking you're human…" : "Email me a code"}
+                  {busy ? "Sending…" : waiting && pass !== null ? "Checking…" : "Email me a code"}
                 </button>
               </form>
             ) : (
@@ -108,19 +110,19 @@ export default function ShareSheet({ what, audience: current, onShare, onClose }
               </form>
             )}
             {botCheckEnabled && <div ref={checkBox} style={{ marginTop: 10 }} />}
-            {pass === null && <div className="tv-error-msg" role="alert" style={{ marginTop: 10 }}>Couldn't load the sign-in check. Check your connection and try again.</div>}
+            {pass === null && <div className="tv-error-msg" role="alert" style={{ marginTop: 10 }}>The app could not load the sign-in check. Check your connection. Then try again.</div>}
           </>) : profile === undefined ? (
             <div className="tv-field-hint">Loading…</div>
           ) : (<>
             <Switch on={audience.followers} label="Followers can see this"
-              desc="People you approve (or anyone, if your profile is public) can follow along and react."
+              desc="People you approve can follow this and react. If your profile is public, anyone can."
               onToggle={() => setAudience((a) => ({ ...a, followers: !a.followers }))} />
             <Switch on={audience.training} label="Help train Amberly"
-              desc="BeakerBoys may use the photos and notes to improve trichome reading. Never shown to others."
+              desc="BeakerBoys may use the photos and notes to improve how Amberly reads trichomes. This choice does not show them to other people."
               onToggle={() => setAudience((a) => ({ ...a, training: !a.training }))} />
             {needsName && <div style={{ marginTop: 6 }}><ProfileFields value={draft} onChange={setDraft} /></div>}
             <p className="tv-field-hint" style={{ margin: "4px 0 14px" }}>
-              Location, camera, and time details are removed from photos. You can change this or stop sharing anytime.
+              Amberly removes location, camera, and time details from photos. You can change this at any time. You can stop sharing at any time.
               See the <a href="/terms.html" target="_blank" rel="noreferrer">Terms</a>.
             </p>
             <button className="tv-btn tv-btn-primary" disabled={busy || (nothing && !alreadyShared) || (needsName && !USERNAME_RULE.test(draft.username))}

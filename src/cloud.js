@@ -66,20 +66,20 @@ const client = () => (clientPromise ??= import("@supabase/supabase-js").then(({ 
 // Turn library errors into one plain sentence for the grower.
 const check = ({ error }) => {
   if (!error) return;
-  if (error.code === "23505") throw new Error("That username is taken. Try another.");
-  if (/row-level security/i.test(error.message || "")) throw new Error("Amberly couldn't do that. If you've shared or reported a lot today, try again tomorrow.");
+  if (error.code === "23505") throw new Error("Another person uses that username. Try another.");
+  if (/row-level security/i.test(error.message || "")) throw new Error("Amberly cannot do that. If you shared or reported many times today, try again tomorrow.");
   const msg = error.message || "";
-  if (/fetch|network|failed to/i.test(msg)) throw new Error("Couldn't reach Amberly's server. Check your connection and try again.");
-  if (/captcha/i.test(msg)) throw new Error("The sign-in check didn't go through. Wait a moment, then try again.");
-  if (error.status === 429 || /rate limit|security purposes/i.test(msg)) throw new Error("Too many tries. Wait a minute, then try again.");
-  if (/expired|invalid/i.test(msg)) throw new Error("That code didn't work. Check it, or send a new one.");
-  throw new Error("Something went wrong. Please try again."); // never show raw server text
+  if (/fetch|network|failed to/i.test(msg)) throw new Error("Amberly cannot reach the server. Check your connection. Then try again.");
+  if (/captcha/i.test(msg)) throw new Error("The sign-in check failed. Wait a moment. Then try again.");
+  if (error.status === 429 || /rate limit|security purposes/i.test(msg)) throw new Error("Too many tries. Wait 1 minute. Then try again.");
+  if (/expired|invalid/i.test(msg)) throw new Error("That code does not work. Check the code, or send a new code.");
+  throw new Error("An error occurred. Try again."); // never show raw server text
 };
 // The signed-in user plus the client, for every call that needs an account.
 const session = async () => {
   const sb = await client();
   const { data } = await sb.auth.getSession();
-  if (!data.session) throw new Error("Please sign in first.");
+  if (!data.session) throw new Error("Sign in first.");
   return { sb, user: data.session.user };
 };
 
@@ -207,7 +207,7 @@ export async function unreact(itemId) {
 const toImage = (src) => (typeof src !== "string" ? Promise.resolve(src) : new Promise((ok, fail) => {
   const img = new Image();
   img.onload = () => ok(img);
-  img.onerror = () => fail(new Error("Couldn't prepare a photo for sharing."));
+  img.onerror = () => fail(new Error("Amberly cannot prepare the photo for sharing."));
   img.src = src;
 }));
 export async function cleanJpeg(src, max = 1600) {
@@ -215,7 +215,7 @@ export async function cleanJpeg(src, max = 1600) {
   const ratio = Math.min(1, max / Math.max(img.width, img.height));
   const canvas = Object.assign(document.createElement("canvas"), { width: Math.round(img.width * ratio), height: Math.round(img.height * ratio) });
   canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-  return new Promise((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Couldn't prepare a photo for sharing."))), "image/jpeg", 0.85));
+  return new Promise((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Amberly cannot prepare the photo for sharing."))), "image/jpeg", 0.85));
 }
 
 // ── Share / unshare ──────────────────────────────────────────────────────────

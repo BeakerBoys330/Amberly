@@ -1,7 +1,7 @@
 {
   "version": "2.0.0",
   "generated": "2026-06-research-aligned",
-  "note": "Curated from community research. Strain facts only; no third-party images.",
+  "note": "Strain facts only (name, type, breeder, flower weeks). No third-party text or images.",
   "totalStrains": 27,
   "strains": [
     {
@@ -9,19 +9,7 @@
       "name": "Runtz",
       "type": "hybrid",
       "breeder": "Cookies / In House",
-      "rating": 4.7,
-      "effects": [
-        "Euphoric",
-        "Relaxing",
-        "Happy"
-      ],
-      "flavors": [
-        "Candy",
-        "Fruity",
-        "Sweet"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Leafly Strain of the Year 2020. Loud candy terps.",
       "trending": true,
       "source": "curated"
     },
@@ -30,19 +18,7 @@
       "name": "Wedding Cake",
       "type": "indica",
       "breeder": "Seed Junky",
-      "rating": 4.7,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Hungry"
-      ],
-      "flavors": [
-        "Vanilla",
-        "Sweet",
-        "Earthy"
-      ],
       "flowerWeeks": "9–10",
-      "description": "Leafly Strain of the Year 2019. Rich and tangy.",
       "trending": true,
       "source": "curated"
     },
@@ -51,19 +27,7 @@
       "name": "Blue Dream",
       "type": "sativa",
       "breeder": "Humboldt Seed Co",
-      "rating": 4.6,
-      "effects": [
-        "Creative",
-        "Uplifting",
-        "Energetic"
-      ],
-      "flavors": [
-        "Blueberry",
-        "Sweet",
-        "Herbal"
-      ],
       "flowerWeeks": "9–10",
-      "description": "West-coast staple. Balanced daytime hybrid.",
       "trending": true,
       "source": "curated"
     },
@@ -72,19 +36,7 @@
       "name": "Gelato",
       "type": "hybrid",
       "breeder": "Cookies / Sherbinski",
-      "rating": 4.6,
-      "effects": [
-        "Euphoric",
-        "Relaxing",
-        "Creative"
-      ],
-      "flavors": [
-        "Sweet",
-        "Citrus",
-        "Dessert"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Leafly Strain of the Year 2018. Dessert genetics.",
       "trending": true,
       "source": "curated"
     },
@@ -93,19 +45,7 @@
       "name": "Zkittlez",
       "type": "indica",
       "breeder": "3rd Gen Family / Terp Hogz",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Happy",
-        "Calm"
-      ],
-      "flavors": [
-        "Candy",
-        "Tropical",
-        "Berry"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Candy-sweet indica, low-odor pheno favorite.",
       "trending": true,
       "source": "curated"
     },
@@ -114,19 +54,7 @@
       "name": "GG4 (Gorilla Glue)",
       "type": "hybrid",
       "breeder": "GG Strains",
-      "rating": 4.7,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Heavy"
-      ],
-      "flavors": [
-        "Diesel",
-        "Pine",
-        "Earthy"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Sticky, potent, multiple Cup winner.",
       "trending": true,
       "source": "curated"
     },
@@ -135,19 +63,7 @@
       "name": "Jealousy",
       "type": "hybrid",
       "breeder": "Seed Junky",
-      "rating": 4.5,
-      "effects": [
-        "Euphoric",
-        "Relaxing",
-        "Focused"
-      ],
-      "flavors": [
-        "Sweet",
-        "Funk",
-        "Diesel"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Leafly Strain of the Year 2022.",
       "trending": true,
       "source": "curated"
     },
@@ -156,19 +72,7 @@
       "name": "Permanent Marker",
       "type": "hybrid",
       "breeder": "Seed Junky",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Talkative"
-      ],
-      "flavors": [
-        "Floral",
-        "Soap",
-        "Funk"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Leafly Strain of the Year 2023.",
       "trending": true,
       "source": "curated"
     },
@@ -177,19 +81,7 @@
       "name": "Super Boof",
       "type": "hybrid",
       "breeder": "Crane City Cannabis",
-      "rating": 4.5,
-      "effects": [
-        "Uplifting",
-        "Happy",
-        "Energetic"
-      ],
-      "flavors": [
-        "Cherry",
-        "Citrus",
-        "Pine"
-      ],
       "flowerWeeks": "9",
-      "description": "Leafly Strain of the Year 2024.",
       "trending": true,
       "source": "curated"
     },
@@ -198,19 +90,7 @@
       "name": "Hash Burger",
       "type": "indica",
       "breeder": "Compound Genetics",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Sedative",
-        "Euphoric"
-      ],
-      "flavors": [
-        "Hash",
-        "Cheese",
-        "Diesel"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Leafly Strain of the Year 2025. ~28–35% THC.",
       "trending": true,
       "source": "curated"
     },
@@ -219,19 +99,7 @@
       "name": "Northern Lights",
       "type": "indica",
       "breeder": "Sensi Seeds",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Sleepy",
-        "Happy"
-      ],
-      "flavors": [
-        "Pine",
-        "Earthy",
-        "Sweet"
-      ],
       "flowerWeeks": "7–8",
-      "description": "Legendary easy-grow indica.",
       "trending": false,
       "source": "curated"
     },
@@ -240,19 +108,7 @@
       "name": "OG Kush",
       "type": "hybrid",
       "breeder": "North Atlantic Seed Co.",
-      "rating": 4.5,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Hungry"
-      ],
-      "flavors": [
-        "Earthy",
-        "Pine",
-        "Lemon"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Foundational West-coast genetics.",
       "trending": false,
       "source": "curated"
     },
@@ -261,19 +117,7 @@
       "name": "Sour Diesel",
       "type": "sativa",
       "breeder": "Humboldt Seed Co",
-      "rating": 4.5,
-      "effects": [
-        "Energetic",
-        "Uplifting",
-        "Creative"
-      ],
-      "flavors": [
-        "Diesel",
-        "Citrus",
-        "Pungent"
-      ],
       "flowerWeeks": "10–11",
-      "description": "Fast-acting energetic sativa.",
       "trending": false,
       "source": "curated"
     },
@@ -282,19 +126,7 @@
       "name": "Amnesia Haze",
       "type": "sativa",
       "breeder": "Royal Queen Seeds",
-      "rating": 4.4,
-      "effects": [
-        "Energetic",
-        "Euphoric",
-        "Creative"
-      ],
-      "flavors": [
-        "Citrus",
-        "Earthy",
-        "Spicy"
-      ],
       "flowerWeeks": "10–11",
-      "description": "Long-flowering haze, rarely ambers.",
       "trending": false,
       "source": "curated"
     },
@@ -303,19 +135,7 @@
       "name": "White Widow",
       "type": "hybrid",
       "breeder": "Sensi Seeds",
-      "rating": 4.4,
-      "effects": [
-        "Euphoric",
-        "Energetic",
-        "Relaxing"
-      ],
-      "flavors": [
-        "Earthy",
-        "Woody",
-        "Pungent"
-      ],
       "flowerWeeks": "8–9",
-      "description": "Resin-heavy 90s classic.",
       "trending": false,
       "source": "curated"
     },
@@ -324,19 +144,7 @@
       "name": "Girl Scout Cookies",
       "type": "hybrid",
       "breeder": "Cookies",
-      "rating": 4.6,
-      "effects": [
-        "Happy",
-        "Relaxing",
-        "Euphoric"
-      ],
-      "flavors": [
-        "Sweet",
-        "Mint",
-        "Earthy"
-      ],
       "flowerWeeks": "9–10",
-      "description": "GSC — parent of countless modern strains.",
       "trending": false,
       "source": "curated"
     },
@@ -345,19 +153,7 @@
       "name": "Gorilla Cookies Auto",
       "type": "auto",
       "breeder": "Fast Buds",
-      "rating": 4.7,
-      "effects": [
-        "Relaxing",
-        "Creative",
-        "Focused"
-      ],
-      "flavors": [
-        "Cookie",
-        "Sweet",
-        "Earthy"
-      ],
       "flowerWeeks": "9–10",
-      "description": "Massive yield, very high THC auto.",
       "trending": true,
       "source": "curated"
     },
@@ -366,19 +162,7 @@
       "name": "Frostbanger Auto",
       "type": "auto",
       "breeder": "Fast Buds",
-      "rating": 4.8,
-      "effects": [
-        "Euphoric",
-        "Uplifting",
-        "Relaxing"
-      ],
-      "flavors": [
-        "Citrus",
-        "Candy",
-        "Gas"
-      ],
       "flowerWeeks": "9–10",
-      "description": "AWC 2025 Highest THC — 29.5% lab-confirmed.",
       "trending": true,
       "source": "curated"
     },
@@ -387,19 +171,7 @@
       "name": "Purple Lemonade Auto",
       "type": "auto",
       "breeder": "Fast Buds",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Happy",
-        "Calm"
-      ],
-      "flavors": [
-        "Lemon",
-        "Grape",
-        "Candy"
-      ],
       "flowerWeeks": "9",
-      "description": "Reliable purple auto, citrus-forward.",
       "trending": true,
       "source": "curated"
     },
@@ -408,19 +180,7 @@
       "name": "Gelato Auto",
       "type": "auto",
       "breeder": "Fast Buds",
-      "rating": 4.5,
-      "effects": [
-        "Euphoric",
-        "Relaxing",
-        "Happy"
-      ],
-      "flavors": [
-        "Sweet",
-        "Berry",
-        "Dessert"
-      ],
       "flowerWeeks": "9",
-      "description": "Dessert terps in autoflower form.",
       "trending": false,
       "source": "curated"
     },
@@ -429,19 +189,7 @@
       "name": "Forgotten Cookies",
       "type": "auto",
       "breeder": "Mephisto Genetics",
-      "rating": 4.8,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Happy"
-      ],
-      "flavors": [
-        "Cookie",
-        "Vanilla",
-        "Earthy"
-      ],
       "flowerWeeks": "9–11",
-      "description": "Cult Mephisto cookie auto.",
       "trending": true,
       "source": "curated"
     },
@@ -450,19 +198,7 @@
       "name": "Samsquanch OG",
       "type": "auto",
       "breeder": "Mephisto Genetics",
-      "rating": 4.7,
-      "effects": [
-        "Relaxing",
-        "Sleepy",
-        "Euphoric"
-      ],
-      "flavors": [
-        "Pine",
-        "Gas",
-        "Earthy"
-      ],
       "flowerWeeks": "9–11",
-      "description": "Robust OG-leaning auto.",
       "trending": false,
       "source": "curated"
     },
@@ -471,19 +207,7 @@
       "name": "3 Bears OG",
       "type": "auto",
       "breeder": "Mephisto Genetics",
-      "rating": 4.7,
-      "effects": [
-        "Relaxing",
-        "Sedative",
-        "Calm"
-      ],
-      "flavors": [
-        "Pine",
-        "Lemon",
-        "Earthy"
-      ],
       "flowerWeeks": "9–11",
-      "description": "Indica-dominant nighttime auto.",
       "trending": false,
       "source": "curated"
     },
@@ -492,19 +216,7 @@
       "name": "Double Grape",
       "type": "auto",
       "breeder": "Mephisto Genetics",
-      "rating": 4.8,
-      "effects": [
-        "Relaxing",
-        "Euphoric",
-        "Happy"
-      ],
-      "flavors": [
-        "Grape",
-        "Gas",
-        "Sweet"
-      ],
       "flowerWeeks": "9–11",
-      "description": "Flagship — 30%+ total cannabinoids.",
       "trending": true,
       "source": "curated"
     },
@@ -513,19 +225,7 @@
       "name": "Zamaldelica Express",
       "type": "auto",
       "breeder": "Night Owl Seeds",
-      "rating": 4.7,
-      "effects": [
-        "Energetic",
-        "Creative",
-        "Psychedelic"
-      ],
-      "flavors": [
-        "Spicy",
-        "Incense",
-        "Citrus"
-      ],
       "flowerWeeks": "11–13",
-      "description": "Sativa-leaning craft auto, rarely ambers.",
       "trending": true,
       "source": "curated"
     },
@@ -534,19 +234,7 @@
       "name": "Mendo Breath Auto",
       "type": "auto",
       "breeder": "Atlas Seed",
-      "rating": 4.6,
-      "effects": [
-        "Relaxing",
-        "Sleepy",
-        "Euphoric"
-      ],
-      "flavors": [
-        "Vanilla",
-        "Caramel",
-        "Earthy"
-      ],
       "flowerWeeks": "9–10",
-      "description": "AAC record — 30.33% THC.",
       "trending": true,
       "source": "curated"
     },
@@ -555,19 +243,7 @@
       "name": "Cinderella Jack Auto",
       "type": "auto",
       "breeder": "Dutch Passion",
-      "rating": 4.5,
-      "effects": [
-        "Energetic",
-        "Uplifting",
-        "Creative"
-      ],
-      "flavors": [
-        "Citrus",
-        "Pine",
-        "Sweet"
-      ],
       "flowerWeeks": "10–11",
-      "description": "High-THC autoflower benchmark.",
       "trending": false,
       "source": "curated"
     }

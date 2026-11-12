@@ -33,10 +33,10 @@ const SC_STYLES = `
 const LOG_LABEL = { water: "Watered", feed: "Fed", photo: "New photo", env: "Climate check", note: "Note" };
 function describe(p) {
   const d = p.data || {};
-  if (p.kind === "grow") return `Sharing a ${d.strainName || "new"} grow (${d.plantType === "auto" ? "autoflower" : "photoperiod"}, ${d.medium || "soil"})`;
+  if (p.kind === "grow") return `Shared a ${d.strainName || "new"} grow (${d.plantType === "auto" ? "autoflower" : "photoperiod"}, ${d.medium || "soil"})`;
   if (p.kind === "reading") {
     const r = d.reading || {};
-    return `Trichome check on ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? `. ${d.note}` : ""}`;
+    return `Reading for ${d.strainName || "a plant"}: ${r.cloudy ?? "?"}% cloudy · ${r.amber ?? "?"}% amber${d.note ? `. ${d.note}` : ""}`;
   }
   const extra = d.type === "env" ? ` · ${d.temp}°F, ${d.rh}% RH` : d.type === "feed" && (d.ec || d.ph) ? ` · ${d.ec ? `EC ${d.ec}` : ""} ${d.ph ? `pH ${d.ph}` : ""}` : "";
   return `${LOG_LABEL[d.type] || "Update"}${extra}${d.note ? `: ${d.note}` : ""}`;
@@ -77,7 +77,7 @@ function Post({ post, userId, onOpenUser, onBlocked }) {
             onClick={act(() => report({ userId: post.user_id, itemId: post.id, reason: r }), "Thanks. BeakerBoys will review this within 24 hours.")}>{r}</button>)}</div>
           <button className="tv-link" style={{ paddingLeft: 0, color: "#b0442c" }}
             onClick={act(async () => {
-              if (!window.confirm(`Block @${post.username}? You won't see each other's posts.`)) return false;
+              if (!window.confirm(`Block @${post.username}? You and @${post.username} will not see each other's posts.`)) return false;
               await block(post.user_id); onBlocked(post.user_id);
             }, "Blocked.")}>
             Block @{post.username}
@@ -257,12 +257,12 @@ export default function Community({ openUsername, onBack }) {
 
   let body;
   if (!user) body = (<>
-    <div className="tv-tip" style={{ marginTop: 0 }}>Follow friends' grows and let them follow yours. You only ever see people you follow. Nothing is ranked or suggested.</div>
+    <div className="tv-tip" style={{ marginTop: 0 }}>Follow the grows of your friends. Your friends can follow your grows. You see only the people you follow. Amberly does not rank or suggest anything.</div>
     <button className="tv-btn tv-btn-primary" style={{ marginTop: 14 }} onClick={() => setSigningIn(true)}>Sign in to follow growers</button>
   </>);
   else if (profile === undefined) body = <div className="tv-field-hint">{error || "Loading…"}</div>;
   else if (profile === null) body = (<>
-    <div className="tv-field-hint" style={{ marginBottom: 12 }}>Pick a username so friends can find and follow you.</div>
+    <div className="tv-field-hint" style={{ marginBottom: 12 }}>Choose a username. Your friends use it to find and follow you.</div>
     <ProfileFields value={draft} onChange={setDraft} />
     <button className="tv-btn tv-btn-primary" disabled={!USERNAME_RULE.test(draft.username)}
       onClick={async () => { try { await saveProfile(draft); setProfile(draft); } catch (e) { setError(e.message); } }}>Continue</button>
@@ -273,7 +273,7 @@ export default function Community({ openUsername, onBack }) {
       <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "find" })}><Icon name="search" /> Find</button>
       <button className="tv-btn tv-btn-soft" onClick={() => setView({ mode: "people" })}><Icon name="users" /> Followers{requests > 0 && <span className="sc-badge">{requests}</span>}</button>
     </div>
-    <PostList userId={user.id} onOpenUser={openUser} empty="When people you follow share their grows, updates show up here, newest first." />
+    <PostList userId={user.id} onOpenUser={openUser} empty="When a person you follow shares a grow, the updates show here. The newest are first." />
   </>);
   else if (view.mode === "find") body = <Find onOpenUser={openUser} />;
   else if (view.mode === "people") body = <People profile={profile} onProfileSaved={setProfile} onOpenUser={openUser} />;

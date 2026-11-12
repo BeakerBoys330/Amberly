@@ -9,8 +9,8 @@ export const LEGAL_VERSION = "2026-11-11";
 export const hasConsent = () => store.get(CONSENT_KEY, null)?.version === LEGAL_VERSION;
 
 const ITEMS = [
-  ["age", "I'm 21 or older"],
-  ["law", "Growing cannabis at home is legal where I live, and I'll follow my local laws"],
+  ["age", "I am 21 or older"],
+  ["law", "It is legal to grow cannabis at home where I live. I will follow my local laws."],
   ["terms", "I agree to the Terms of Use and Privacy Policy"],
 ];
 
@@ -27,17 +27,17 @@ export default function LegalGate({ onAccept }) {
       <div className="tv-header">
         <div className="tv-eyebrow">Before you start</div>
         <div className="tv-title">Amberly</div>
-        <div className="tv-subtitle">A harvest-timing and grow-planning tool for adults.</div>
+        <div className="tv-subtitle">A tool for adults to time the harvest and plan the grow.</div>
       </div>
 
       <div className="tv-card"><div className="tv-card-pad">
         <div className="tv-section-title" style={{ marginBottom: 10 }}>The short version</div>
         <div className="tv-tip" style={{ marginTop: 0 }}>
           • Your grows, notes, and photos stay on this device unless you choose to share them.<br />
-          • Trichome readings are a guide, not a lab test. You make the final call.<br />
+          • Trichome readings are a guide, not a lab test. You make the final decision.<br />
           • Nothing here is medical, legal, or professional advice.<br />
           • Amberly never sells or links to cannabis products.<br />
-          • This is early test software. It may have bugs, and data can be lost.
+          • This is early test software. It may have bugs. You can lose data.
         </div>
       </div></div>
 
@@ -58,7 +58,7 @@ export default function LegalGate({ onAccept }) {
 
       <button className="tv-btn tv-btn-primary" disabled={!all} onClick={accept}>Agree and continue</button>
       <div className="tv-disclaimer" style={{ marginTop: 12 }}>
-        If you're under 21, or home growing isn't legal where you live, please don't use Amberly.
+        If you are under 21, or if it is not legal to grow at home where you live, do not use Amberly.
       </div>
     </>
   );

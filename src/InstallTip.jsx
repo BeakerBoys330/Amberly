@@ -39,7 +39,7 @@ export default function InstallTip() {
       <div className="tv-install-title">Keep Amberly on your Home Screen</div>
       {ios ? (
         <>
-          <p>It opens like an app and works with no signal. It also stops Safari from clearing your grows after a week away.</p>
+          <p>It opens like an app and works with no signal. It also stops Safari from deleting your grows if you do not open Amberly for 1 week.</p>
           <ol>
             <li>Tap <Icon name="share" /> <b>Share</b> in your browser</li>
             <li>Tap <Icon name="add" /> <b>Add to Home Screen</b></li>

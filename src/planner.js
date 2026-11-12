@@ -48,30 +48,30 @@ export const relDay = (d) => {
 export const STAGES = {
   germination: { label: "Germination", icon: "bean", ppfd: [75, 200], dli: [6, 12], day: [75, 80], night: [70, 75], rh: [70, 90], vpd: [0.4, 0.6],
     ec: { soil: [0, 0], coco: [0.2, 0.4] }, feed: "None. The seed feeds itself.",
-    tasks: ["Keep the medium moist, not soaked", "Note the day it breaks the surface"] },
+    tasks: ["Keep the medium moist, not soaked", "Note the day the sprout shows above the medium"] },
   seedling: { label: "Seedling", icon: "sprout", ppfd: [100, 300], dli: [15, 20], day: [70, 80], night: [65, 75], rh: [65, 75], vpd: [0.4, 0.8],
-    ec: { soil: [0, 0.4], coco: [0.4, 0.6] }, feed: "Plain water in soil. ¼-strength in coco/hydro.",
-    tasks: ["Small ring waterings around the stem", "Start gentle LST (tie-down) at 3–4 nodes"] },
+    ec: { soil: [0, 0.4], coco: [0.4, 0.6] }, feed: "Use plain water in soil. Use ¼ strength in coco or hydro.",
+    tasks: ["Water in a small ring around the stem", "At 3–4 nodes, start gentle LST (tie-down)"] },
   earlyVeg: { label: "Early veg", icon: "leaf", ppfd: [300, 450], dli: [20, 30], day: [72, 82], night: [65, 75], rh: [55, 70], vpd: [0.8, 1.0],
-    ec: { soil: [0.6, 1.0], coco: [0.8, 1.2] }, feed: "Nitrogen-heavy veg/grow formula, start at half strength.",
-    tasks: ["Top or FIM at 4–6 nodes (autos: once at most, before pistils)", "Keep LST going to open the canopy"] },
+    ec: { soil: [0.6, 1.0], coco: [0.8, 1.2] }, feed: "Use a veg formula high in nitrogen. Start at half strength.",
+    tasks: ["At 4–6 nodes, top or FIM. Autos: do this once at most, before pistils", "Continue LST to open the canopy"] },
   lateVeg: { label: "Late veg", icon: "tree", ppfd: [450, 650], dli: [30, 40], day: [72, 85], night: [65, 75], rh: [50, 60], vpd: [1.0, 1.2],
-    ec: { soil: [1.0, 1.4], coco: [1.2, 1.8] }, feed: "Nitrogen plus rising phosphorus/potassium.",
-    tasks: ["Water to 10–20% runoff", "Light clean-up of lower leaves before flower"] },
+    ec: { soil: [1.0, 1.4], coco: [1.2, 1.8] }, feed: "Use nitrogen. Add more phosphorus and potassium.",
+    tasks: ["Water until 10–20% runs out of the pot", "Before flower, remove a few lower leaves"] },
   stretch: { label: "Early flower (stretch)", icon: "flower", ppfd: [600, 800], dli: [25, 35], day: [70, 80], night: [64, 72], rh: [45, 55], vpd: [1.0, 1.3],
-    ec: { soil: [1.2, 1.6], coco: [1.4, 2.0] }, feed: "Shift to bloom formula: P/K up, keep some N.",
-    tasks: ["Plants can double in height, so keep an eye on light distance", "Optional: defoliate around flower day 21", "No more topping from here"] },
+    ec: { soil: [1.2, 1.6], coco: [1.4, 2.0] }, feed: "Change to a bloom formula. Increase P and K. Keep some N.",
+    tasks: ["Plants can double in height. Check the light distance often", "Optional: defoliate near flower day 21", "Do not top the plant now"] },
   midFlower: { label: "Mid flower", icon: "flower2", ppfd: [800, 1000], dli: [35, 45], day: [68, 80], night: [62, 72], rh: [40, 50], vpd: [1.2, 1.5],
-    ec: { soil: [1.4, 1.8], coco: [1.6, 2.2] }, feed: "Peak bloom feeding: high P/K, low N.",
-    tasks: ["Peak thirst: check pots daily", "No high-stress training", "Keep humidity down: buds are getting dense"] },
+    ec: { soil: [1.4, 1.8], coco: [1.6, 2.2] }, feed: "Use peak bloom feeding: high P and K, low N.",
+    tasks: ["The plant needs the most water now. Check the pots each day", "Do not use high-stress training", "Keep humidity low. The buds are dense now"] },
   lateFlower: { label: "Late flower", icon: "hourglass", ppfd: [650, 900], dli: [25, 40], day: [65, 78], night: [60, 68], rh: [35, 45], vpd: [1.2, 1.6],
-    ec: { soil: [1.0, 1.4], coco: [0.9, 1.4] }, feed: "Taper off: potassium-heavy, low nitrogen.",
-    tasks: ["Scan trichomes every 2–3 days", "Yellowing fan leaves now is normal", "Start your flush if you chose one"] },
+    ec: { soil: [1.0, 1.4], coco: [0.9, 1.4] }, feed: "Reduce the feed. Use high potassium and low nitrogen.",
+    tasks: ["Scan trichomes every 2–3 days", "Yellow fan leaves are normal now", "Start your flush if you chose one"] },
   drying: { label: "Drying", icon: "wind", day: [60, 70], night: [60, 70], rh: [55, 62],
-    tasks: ["Dark room, gentle airflow. Aim for 60°F / 60% RH", "Done when small stems snap (7–14 days)"] },
+    tasks: ["Use a dark room with gentle airflow. Aim for 60°F and 60% RH", "It is done when small stems snap (7–14 days)"] },
   curing: { label: "Curing", icon: "jar", day: [60, 70], night: [60, 70], rh: [58, 62],
-    tasks: ["Jars about ¾ full, target 58–62% RH", "Burp daily week 1, every 2–3 days week 2, then weekly"] },
-  done: { label: "Cured & ready", icon: "trophy", tasks: ["Enjoy it, and log how it turned out"] },
+    tasks: ["Fill jars about ¾ full. Target 58–62% RH", "Open the jars each day in week 1, every 2–3 days in week 2, then each week"] },
+  done: { label: "Cured & ready", icon: "trophy", tasks: ["Enjoy it. Log the result"] },
 };
 const FLOWER_KEYS = ["stretch", "midFlower", "lateFlower"];
 export const PH = { soil: "6.3–6.8", coco: "5.8–6.2", hydro: "5.5–6.0" };
@@ -134,7 +134,7 @@ export function plan(g, scans = []) {
     { label: "Start trichome scans", date: at(Math.max(flower, harvest - 14)), icon: "microscope" },
     flush && { label: `Start ${flush}-day flush`, date: at(harvest - flush), icon: "shower" },
     { label: fc?.date && !g.harvestDate ? "Harvest (from your scans)" : "Estimated harvest", date: at(harvest), icon: "scissors", actual: !!g.harvestDate },
-    { label: "Dry done → into jars", date: at(harvest + 10), icon: "jar" },
+    { label: "Drying done: fill jars", date: at(harvest + 10), icon: "jar" },
     { label: "Cured & ready", date: at(harvest + 38), icon: "trophy" },
   ].filter(Boolean);
 
@@ -179,8 +179,8 @@ export function feedPlan(g, stageKey) {
     focus: st.feed,
     ec, ppm: ec.map((v) => Math.round(v * 500)),
     ph: PH[g.medium] || PH.soil,
-    strength: auto ? "Autos: use ¼–½ of the bottle's chart strength." : "Start at ½ the bottle's chart strength; raise only if leaves go pale.",
-    calmag: g.medium === "coco" || g.roWater ? "Add Cal-Mag every feed (coco/RO water binds calcium & magnesium)." : null,
+    strength: auto ? "For autos, use ¼–½ of the chart strength on the bottle." : "Start at ½ of the chart strength on the bottle. Increase it only if the leaves become pale.",
+    calmag: g.medium === "coco" || g.roWater ? "Add Cal-Mag at each feed. Coco and RO water can cause a lack of calcium and magnesium." : null,
   };
 }
 
@@ -190,16 +190,16 @@ export function envCheck(stageKey, tempF, rh) {
   const st = STAGES[stageKey], c = ((tempF - 32) * 5) / 9;
   const vpd = Math.max(0, svp(c - 1.5) - svp(c) * (rh / 100));
   const out = [];
-  if (tempF > 90) out.push(["bad", "Too hot (over 90°F). Raise or dim the light, add airflow."]);
-  else if (tempF > 85) out.push(["warn", "Running hot (over 85°F)."]);
-  else if (tempF < 60) out.push(["bad", "Too cold (under 60°F). Growth will stall."]);
-  else if (st.day && tempF < st.day[0] - 3) out.push(["warn", `A bit cool for ${st.label.toLowerCase()} (aim ${st.day[0]}–${st.day[1]}°F).`]);
+  if (tempF > 90) out.push(["bad", "It is too hot (over 90°F). Raise the light or dim it. Add airflow."]);
+  else if (tempF > 85) out.push(["warn", "It is hot (over 85°F)."]);
+  else if (tempF < 60) out.push(["bad", "It is too cold (under 60°F). Growth will stop."]);
+  else if (st.day && tempF < st.day[0] - 3) out.push(["warn", `It is a little cool for ${st.label.toLowerCase()}. Aim for ${st.day[0]}–${st.day[1]}°F.`]);
   if (st.rh && rh > st.rh[1] + 5) out.push([FLOWER_KEYS.includes(stageKey) && rh > 60 ? "bad" : "warn",
     FLOWER_KEYS.includes(stageKey) ? `Humidity ${rh}% is a bud-rot risk. Aim for ${st.rh[0]}–${st.rh[1]}%.` : `Humidity is high. Aim for ${st.rh[0]}–${st.rh[1]}%.`]);
   else if (st.rh && rh < st.rh[0] - 5) out.push(["warn", `Air is dry. Aim for ${st.rh[0]}–${st.rh[1]}%.`]);
   if (st.vpd) {
-    if (vpd < 0.4 || vpd > 1.6) out.push(["bad", `VPD ${vpd.toFixed(2)} kPa is in the danger zone (aim ${st.vpd[0]}–${st.vpd[1]}).`]);
-    else if (vpd < st.vpd[0] - 0.1 || vpd > st.vpd[1] + 0.1) out.push(["warn", `VPD ${vpd.toFixed(2)} kPa. Target ${st.vpd[0]}–${st.vpd[1]} for this stage.`]);
+    if (vpd < 0.4 || vpd > 1.6) out.push(["bad", `VPD ${vpd.toFixed(2)} kPa is dangerous. Aim for ${st.vpd[0]}–${st.vpd[1]}.`]);
+    else if (vpd < st.vpd[0] - 0.1 || vpd > st.vpd[1] + 0.1) out.push(["warn", `VPD ${vpd.toFixed(2)} kPa. The target for this stage is ${st.vpd[0]}–${st.vpd[1]}.`]);
   }
   return { vpd, issues: out };
 }
@@ -209,8 +209,8 @@ export function lightCheck(g) {
   const area = (+g.tentW || 0) * (+g.tentL || 0), w = +g.lightWatts || 0;
   if (area <= 0 || w <= 0) return null;
   const wpsf = w / area;
-  const msg = wpsf < 20 ? "Under-lit for flowering. Expect a smaller harvest."
-    : wpsf < 30 ? "Adequate for flowering." : wpsf <= 50 ? "Strong, great for flowering." : "Very strong. Dim it if tops bleach or temps climb.";
+  const msg = wpsf < 20 ? "The light is too weak for flowering. Expect a smaller harvest."
+    : wpsf < 30 ? "The light is enough for flowering." : wpsf <= 50 ? "The light is strong. It is good for flowering." : "The light is very strong. If the tops bleach or the temperature rises, dim it.";
   return { wpsf: Math.round(wpsf), msg, ok: wpsf >= 20 };
 }
 

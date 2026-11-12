@@ -313,7 +313,7 @@ const STYLES = `
   }
   .tv-field-hint { font-size: 13px; color: #766b60; font-weight: 400; }
 
-  .tv-input, .tv-select, .tv-textarea {
+  .tv-input, .tv-textarea {
     width: 100%;
     background: #fffdfa;
     border: 1px solid #e7ddd0;
@@ -325,15 +325,10 @@ const STYLES = `
     transition: border-color 0.18s, box-shadow 0.18s;
   }
   .tv-input::placeholder, .tv-textarea::placeholder { color: #766b60; }
-  .tv-input:focus, .tv-select:focus, .tv-textarea:focus {
+  .tv-input:focus, .tv-textarea:focus {
     border-color: #d99a3c; box-shadow: 0 0 0 4px rgba(217,154,60,0.12);
   }
   .tv-textarea { resize: none; min-height: 84px; line-height: 1.5; }
-  .tv-select {
-    appearance: none; -webkit-appearance: none; cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a4988a' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px;
-  }
 
   /* ── SEGMENTED PILLS (type chooser inside add-your-own) ── */
   .tv-seg { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -351,7 +346,6 @@ const STYLES = `
     background: #fff8ee; border: 1px solid #f0e0c6; border-radius: 16px;
     padding: 12px 16px; margin-bottom: 14px;
   }
-  .tv-banner-img { width: 46px; height: 46px; border-radius: 11px; object-fit: cover; flex-shrink: 0; background: #f1e9dd; }
   .tv-banner-name { font-size: 16px; font-weight: 600; color: #2b2622; letter-spacing: -0.01em; }
   .tv-banner-meta { font-size: 13px; color: #766b60; margin-top: 2px; }
 
@@ -455,8 +449,6 @@ const STYLES = `
   .tv-loading { text-align: center; padding: 36px; font-size: 15px; color: #766b60; }
 
   /* ── COUNT / STATUS ── */
-  .tv-count { font-size: 13px; color: #766b60; }
-  .tv-status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
 
   /* ── MODAL (kept minimal, used only for tiny confirmations now) ── */
   .tv-overlay { position: fixed; inset: 0; background: rgba(43,38,34,0.4); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -573,13 +565,13 @@ const combineSamples = (samples) => {
 // it depends on the effect the grower wants. So the recommendation is a function of
 // BOTH the measured trichomes AND a chosen target. Each profile defines its own
 // ideal amber band (per Ed Rosenthal / GrowWeedEasy / Royal Queen Seeds consensus):
-//   energetic = mostly cloudy, minimal amber (<8%)   -> daytime, cerebral
-//   balanced  = cloudy + 10-20% amber                -> hybrid, all-purpose
-//   relaxed   = 30%+ amber                            -> nighttime, sedative
+//   energetic = mostly cloudy, 1-10% amber   -> daytime, cerebral
+//   balanced  = cloudy + 10-22% amber        -> hybrid, all-purpose
+//   relaxed   = 25-55% amber                 -> nighttime, sedative
 const EFFECT_PROFILES = {
-  energetic: { label: "Energetic",  blurb: "Daytime, heady and clear",    amberMin: 1,  amberIdeal: 5,  amberMax: 10 },
-  balanced:  { label: "Balanced",   blurb: "All-purpose, body and mind",  amberMin: 10, amberIdeal: 15, amberMax: 22 },
-  relaxed:   { label: "Relaxed",    blurb: "Nighttime, heavy and sleepy", amberMin: 25, amberIdeal: 35, amberMax: 55 },
+  energetic: { label: "Energetic", blurb: "Daytime. Clear and focused.",   amberMin: 1,  amberIdeal: 5,  amberMax: 10 },
+  balanced:  { label: "Balanced",  blurb: "Any time. Body and mind.",      amberMin: 10, amberIdeal: 15, amberMax: 22 },
+  relaxed:   { label: "Relaxed",   blurb: "Nighttime. Calm body, sleepy.", amberMin: 25, amberIdeal: 35, amberMax: 55 },
 };
 
 // Decide the harvest recommendation given measured trichomes + chosen effect goal.
@@ -589,8 +581,8 @@ const getRecommendation = ({ clear, milky, amber }, effectKey = "balanced") => {
   // Still immature: too many clear heads / not enough cloudy, regardless of goal.
   if (milky < 50 || clear > 40) {
     return { stage:"Not ready", timing:"About 1–2 weeks", cls:"tv-rec-early",
-      note:"Trichomes are still mostly clear, so potency hasn't peaked. Keep checking.",
-      effect:"Low potency if harvested now", detail:`${clear}% clear · ${milky}% cloudy · ${amber}% amber` };
+      note:"The trichomes are still mostly clear. Potency is not at its peak. Check again later.",
+      effect:"Potency is low if you harvest now", detail:`${clear}% clear · ${milky}% cloudy · ${amber}% amber` };
   }
 
   // Past the chosen window: more amber than this profile wants = over-ripe for the goal.
@@ -599,22 +591,22 @@ const getRecommendation = ({ clear, milky, amber }, effectKey = "balanced") => {
     return { stage: veryLate ? "Over-ripe" : "Past the window", timing: veryLate ? "Harvest right away" : "Harvest now",
       cls:"tv-rec-late",
       note: veryLate
-        ? "Heavy CBN conversion. Expect a strong, narcotic, couch-lock effect."
-        : `More amber than a ${p.label.toLowerCase()} harvest calls for. Leaning sedative.`,
-      effect:"Sedative, body-heavy", detail:`${amber}% amber (CBN accumulating)` };
+        ? "Much THC has changed to CBN. Expect a strong, heavy, sleepy effect."
+        : `The trichomes have more amber than a ${p.label.toLowerCase()} harvest needs. The effect will be sedative.`,
+      effect:"Sedative, heavy body", detail:`${amber}% amber (CBN increases)` };
   }
 
   // Inside the chosen window: ideal harvest for this goal.
   if (amber >= p.amberMin) {
     return { stage:"Harvest window", timing:"Harvest now", cls:"tv-rec-peak",
-      note:`Trichomes match your ${p.label.toLowerCase()} target (${p.amberMin}–${p.amberMax}% amber). This is your window.`,
+      note:`The trichomes match your ${p.label.toLowerCase()} target (${p.amberMin}–${p.amberMax}% amber). Harvest in this window.`,
       effect:p.blurb, detail:`${milky}% cloudy · ${amber}% amber` };
   }
 
   // Cloudy-dominant but not yet enough amber for the chosen goal: approaching.
   const daysOut = effectKey === "energetic" ? "0–3 days" : effectKey === "balanced" ? "2–6 days" : "5–10 days";
   return { stage:"Almost there", timing:daysOut, cls:"tv-rec-window",
-    note:`Cloudy and potent now. Wait for amber to reach ~${p.amberIdeal}% for your ${p.label.toLowerCase()} target, or harvest now for a more energetic effect.`,
+    note:`The trichomes are cloudy and potent. Wait until amber reaches about ${p.amberIdeal}% for your ${p.label.toLowerCase()} target. For a more energetic effect, harvest now.`,
     effect:"High THC, aromatic", detail:`${milky}% cloudy · ${amber}% amber` };
 };
 
@@ -733,7 +725,7 @@ export default function Amberly() {
   // the "Most Compatible" tip instead of a bundled converter.
   const decodeFile = useCallback(async (file) => {
     if (file.size > MAX_FILE_BYTES) {
-      throw new Error(`"${file.name || "That photo"}" is over 10 MB. Try a smaller one.`);
+      throw new Error(`"${file.name || "That photo"}" is over 10 MB. Use a smaller photo.`);
     }
 
     const name = (file.name || "").toLowerCase();
@@ -742,12 +734,12 @@ export default function Amberly() {
       name.endsWith(".heic") || name.endsWith(".heif");
 
     if (!file.type.startsWith("image/") && !looksHeic) {
-      throw new Error(`"${file.name || "That file"}" isn't a photo.`);
+      throw new Error(`"${file.name || "That file"}" is not a photo.`);
     }
 
     const dataUrl = await new Promise((res, rej) => {
       const reader = new FileReader();
-      reader.onerror = () => rej(new Error("Couldn't read that photo from your device."));
+      reader.onerror = () => rej(new Error("The app cannot read that photo from your device."));
       reader.onload = () => res(reader.result);
       reader.readAsDataURL(file);
     });
@@ -756,8 +748,8 @@ export default function Amberly() {
       const im = new Image();
       im.onload = () => res(im);
       im.onerror = () => rej(new Error(looksHeic
-        ? 'This browser can\'t open iPhone HEIC photos. Use Safari, or on your iPhone set Settings → Camera → Formats → "Most Compatible".'
-        : "That photo's format isn't supported. Try a JPEG or PNG."));
+        ? 'This browser cannot open iPhone HEIC photos. Use Safari. Or, on your iPhone, tap Settings → Camera → Formats, then choose "Most Compatible".'
+        : "The app does not support that photo format. Use a JPEG or PNG photo."));
       im.src = dataUrl;
     });
   }, []);
@@ -776,7 +768,7 @@ export default function Amberly() {
   // Grow-planner photos: same safe decode, bigger thumbnail, nothing analyzed.
   const fileToThumb = useCallback(async (file) => {
     const t = makeThumb(await decodeFile(file), 480);
-    if (!t) throw new Error("Couldn't process that photo.");
+    if (!t) throw new Error("The app cannot process that photo.");
     return t;
   }, [decodeFile]);
 
@@ -804,7 +796,7 @@ export default function Amberly() {
         lastPreview = preview;
         if (thumb) lastThumb = thumb;
       } catch (err) {
-        if (!firstError) firstError = err?.message || "Couldn't read that photo.";
+        if (!firstError) firstError = err?.message || "The app cannot read that photo.";
       }
     }
 
@@ -820,8 +812,8 @@ export default function Amberly() {
     } else {
       // Nothing usable came through: say why, and keep any reading already on screen.
       setPhotoError(firstError || (noTrichomeCount
-        ? "No trichomes detected. Get closer (a macro lens or loupe helps) and fill the frame with bud, not leaf."
-        : "Couldn't read those photos. Please try different ones."));
+        ? "The app found no trichomes. Move closer. A macro lens or loupe helps. Fill the frame with bud, not leaf."
+        : "The app cannot read those photos. Use different photos."));
     }
 
     setAnalyzing(false);
@@ -850,7 +842,6 @@ export default function Amberly() {
       id, name,
       type: strainType === "autos" ? "auto" : "hybrid",
       breeder: "Your strain",
-      rating: 0, effects: [], flavors: [], description: "",
       source: "user-added",
     };
     setDatabase(prev => [...prev, entry]);
@@ -875,7 +866,7 @@ export default function Amberly() {
   // (a full device would otherwise lose entries silently).
   const persistDiary = useCallback((next) => {
     if (!store.set(DIARY_KEY, next)) {
-      setDiaryError("Your device storage is full. Delete old diary entries or grow photos, then try again.");
+      setDiaryError("The storage on your device is full. Delete old diary entries or grow photos. Then try again.");
       return false;
     }
     setDiary(next);
@@ -930,14 +921,14 @@ export default function Amberly() {
 
   // Wipes everything Amberly stored on this device (privacy: right to delete).
   const deleteAllData = () => {
-    if (!window.confirm("Delete all your grows, diary entries, photos, and settings from this device? This can't be undone."
-      + (cloudUser ? "\n\nThings you've shared stay with BeakerBoys until you delete your account." : ""))) return;
+    if (!window.confirm("Delete all your grows, diary entries, photos, and settings from this device? This cannot be undone."
+      + (cloudUser ? "\n\nThe items you shared stay with BeakerBoys until you delete your account." : ""))) return;
     [LEGACY_PREFS_KEY, DIARY_KEY, GROWS_KEY, CONSENT_KEY, AUTH_KEY, INSTALL_KEY].forEach(store.remove);
     window.location.reload();
   };
 
   const removeAccount = async () => {
-    if (!window.confirm("Delete your Amberly account and everything you've shared with BeakerBoys? Your grows stay on this device. This can't be undone.")) return;
+    if (!window.confirm("Delete your Amberly account and everything you shared with BeakerBoys? Your grows stay on this device. This cannot be undone.")) return;
     setAccountMsg("Deleting…");
     try {
       await deleteAccount();
@@ -946,7 +937,7 @@ export default function Amberly() {
       persistDiary(diary.map(({ sharing, ...e }) => ({ ...e, shared: false })));
       const grows = store.get(GROWS_KEY, []);
       if (Array.isArray(grows)) store.set(GROWS_KEY, grows.map(({ sharing, ...g }) => ({ ...g, shared: false, logs: (g.logs || []).map(({ synced, ...l }) => l) })));
-      setAccountMsg("Your account and shared data were deleted.");
+      setAccountMsg("The app deleted your account and shared data.");
     } catch (e) { setAccountMsg(e.message); }
   };
 
@@ -969,10 +960,10 @@ export default function Amberly() {
           {step === "welcome" && (
             <>
               <div className="tv-header">
-                <div className="tv-eyebrow">Know the moment to harvest</div>
+                <div className="tv-eyebrow">Know when to harvest</div>
                 <div className="tv-title">Amberly</div>
                 <div className="tv-subtitle">
-                  Point your camera at the buds. We read the trichomes and tell you when to chop.
+                  Point your camera at the buds. We read the trichomes and tell you when to harvest.
                 </div>
               </div>
 
@@ -987,7 +978,7 @@ export default function Amberly() {
                   <Tile name="sprout" />
                   <span className="tv-choice-text">
                     <span className="tv-choice-name">Autoflower</span>
-                    <span className="tv-choice-desc">Flowers on its own, about 8–10 weeks</span>
+                    <span className="tv-choice-desc">Flowers by itself. Seed to harvest in 9–13 weeks</span>
                   </span>
                 </button>
 
@@ -995,7 +986,7 @@ export default function Amberly() {
                   <Tile name="sun" />
                   <span className="tv-choice-text">
                     <span className="tv-choice-name">Photoperiod</span>
-                    <span className="tv-choice-desc">Flowers on a light schedule, about 8–12 weeks</span>
+                    <span className="tv-choice-desc">Flowers on a light schedule. Flower takes 8–11 weeks</span>
                   </span>
                 </button>
               </div>
@@ -1043,7 +1034,7 @@ export default function Amberly() {
 
               <div className="tv-hero">
                 <div className="tv-hero-title">Pick your strain</div>
-                <div className="tv-hero-sub">Tap yours to continue. Not listed? Add it below.</div>
+                <div className="tv-hero-sub">Tap your strain. If it is not listed, add it below.</div>
               </div>
 
               <div className="tv-search-wrap">
@@ -1073,7 +1064,7 @@ export default function Amberly() {
               {/* Nothing matched the search: offer to use what they typed. */}
               {!filtered.length && query.trim() && (
                 <div className="tv-addown" style={{ marginBottom: 16 }}>
-                  <div className="tv-addown-q">We don't have "{query.trim()}" yet.</div>
+                  <div className="tv-addown-q">We do not have "{query.trim()}" yet.</div>
                   <button className="tv-btn tv-btn-primary" onClick={() => handleAddOwn(query)}>Use "{query.trim().slice(0, 60)}"</button>
                 </div>
               )}
@@ -1087,7 +1078,7 @@ export default function Amberly() {
                 </div>
               ) : (
                 <div className="tv-addown" style={{ marginBottom: 16 }}>
-                  <div className="tv-addown-q">What's it called?</div>
+                  <div className="tv-addown-q">What is its name?</div>
                   <input
                     className="tv-input"
                     placeholder="Strain name"
@@ -1138,7 +1129,7 @@ export default function Amberly() {
               {/* Effect dial */}
               <div className="tv-hero" style={{ marginBottom: 18 }}>
                 <div className="tv-hero-title">What feeling do you want?</div>
-                <div className="tv-hero-sub">We'll aim your harvest window for it.</div>
+                <div className="tv-hero-sub">We will set your harvest window for it.</div>
               </div>
 
               <div className="tv-dial" style={{ marginBottom: 24 }}>
@@ -1170,11 +1161,11 @@ export default function Amberly() {
                 <button type="button" className="tv-upload" onClick={() => fileRef.current?.click()}>
                   <div className="tv-big-icon"><Icon name="photo" size={32} /></div>
                   <div className="tv-upload-text">Take or choose photos</div>
-                  <div className="tv-upload-hint">One photo or several. Get close on the buds.</div>
+                  <div className="tv-upload-hint">Use one photo or several. Move close to the buds.</div>
                 </button>
               ) : (
                 <>
-                  <img src={image} className="tv-img-preview" alt="Your most recent sample" />
+                  <img src={image} className="tv-img-preview" alt="Your newest photo" />
                   <div className="tv-btn-row">
                     <button className="tv-btn tv-btn-soft" onClick={() => fileRef.current?.click()}>
                       <Plus size={16} /> Add another
@@ -1187,7 +1178,7 @@ export default function Amberly() {
               )}
 
               <div className="tv-tip">
-                <b>Tip:</b> snap 3 buds: top, middle, and lower. Tops ripen first, so a few photos give a truer read than one.
+                <b>Tip:</b> Take photos of 3 buds: top, middle, and lower. Tops ripen first, so several photos give a better reading than 1 photo.
               </div>
 
               {/* States */}
@@ -1197,7 +1188,7 @@ export default function Amberly() {
                 <div className="tv-error" role="alert" style={{ marginTop: 14 }}>
                   <Icon name="search" size={22} />
                   <div>
-                    <div className="tv-error-title">Couldn't read that one</div>
+                    <div className="tv-error-title">Cannot read that photo</div>
                     <div className="tv-error-msg">{photoError}</div>
                   </div>
                 </div>
@@ -1207,7 +1198,7 @@ export default function Amberly() {
                 <div style={{ marginTop: 24 }}>
                   {lowCoverage && (
                     <div className="tv-warn">
-                      Not many trichomes in view, so this reading may be off. Try getting closer and adding another photo.
+                      The photo shows few trichomes, so this reading may be wrong. Move closer and add another photo.
                     </div>
                   )}
 
@@ -1215,7 +1206,7 @@ export default function Amberly() {
                     <div className="tv-card-pad">
                       <div className="tv-section-title">Trichome reading</div>
                       <div className="tv-section-meta">
-                        {analysis.samples === 1 ? "From 1 photo" : `Average of ${analysis.samples} photos`}. Orange hairs are left out.
+                        {analysis.samples === 1 ? "From 1 photo" : `Average of ${analysis.samples} photos`}. The app ignores orange hairs.
                       </div>
 
                       <div className="tv-bar-row">
@@ -1254,7 +1245,7 @@ export default function Amberly() {
                   )}
 
                   <div className="tv-disclaimer">
-                    A helpful guide, not a lab test. Trust your own eyes on the calyxes for the final call.
+                    A helpful guide, not a lab test. Make the final decision with your own eyes on the calyxes.
                   </div>
 
                   {/* Save to grow diary — add an optional note, then keep it on-device */}
@@ -1263,7 +1254,7 @@ export default function Amberly() {
                       <div className="tv-note-title">Save to your grow diary</div>
                       <textarea
                         className="tv-textarea"
-                        placeholder="Optional note, like 'Week 8, frosty, giving it 4 more days'"
+                        placeholder="Optional note, for example 'Week 8, frosty, 4 more days'"
                         value={diaryNote}
                         onChange={e => setDiaryNote(e.target.value)}
                         style={{ marginBottom: 12 }}
@@ -1280,7 +1271,7 @@ export default function Amberly() {
                       </div>
                       <div style={{ fontSize: 13, color: "#766b60" }}>
                         {!savedEntry?.shared ? "Kept on this device."
-                          : [savedEntry.sharing?.followers && "Shared with your followers", savedEntry.sharing?.training && "helping train Amberly"].filter(Boolean).join(" · ")}
+                          : [savedEntry.sharing?.followers && "Shared with your followers", savedEntry.sharing?.training && "Used to train Amberly"].filter(Boolean).join(" · ")}
                       </div>
                       {diaryError && <div className="tv-error-msg" style={{ marginTop: 8 }}>{diaryError}</div>}
                     </div>
@@ -1397,8 +1388,8 @@ export default function Amberly() {
               <div className="tv-modal-title">About Amberly</div>
               <p style={{ fontSize: 15, color: "#6b5d4c", lineHeight: 1.6, marginBottom: 18 }}>
                 Amberly reads the color of your trichomes (the tiny resin glands on the
-                buds) to estimate the best moment to harvest. Everything runs on your
-                device, and nothing is shared unless you choose to share it.
+                buds). It estimates the best time to harvest. Everything runs on your
+                device. The app shares nothing unless you choose to share it.
               </p>
               {cloudEnabled && (
                 <div className="tv-tip" style={{ marginTop: 0, marginBottom: 14 }}>
@@ -1406,13 +1397,13 @@ export default function Amberly() {
                   {cloudUser ? <>Signed in as {cloudUser.email}<br />
                     <button className="tv-link" style={{ paddingLeft: 0 }} onClick={() => signOut().catch(e => setAccountMsg(e.message))}>Sign out</button>
                     <button className="tv-link" onClick={removeAccount}>Delete account &amp; shared data</button></>
-                    : <>Not signed in. Everything works without an account; sign in only if you want to share.<br />
+                    : <>You are not signed in. Everything works without an account. Sign in only to share.<br />
                       <button className="tv-link" style={{ paddingLeft: 0 }} onClick={() => setSigningIn(true)}>Sign in or create account</button></>}
                   {accountMsg && <div style={{ marginTop: 6 }}>{accountMsg}</div>}
                 </div>
               )}
               <p className="tv-field-hint" style={{ marginBottom: 14 }}>
-                Color rules tuned with the "trichome colour detection" and "trichomes" datasets
+                We tuned the color rules with the "trichome colour detection" and "trichomes" datasets
                 from Roboflow Universe (CC BY 4.0).
               </p>
               <button className="tv-btn tv-btn-primary" onClick={() => setShowAbout(false)}>Close</button>
