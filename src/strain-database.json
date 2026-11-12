@@ -19,7 +19,6 @@
       "type": "indica",
       "breeder": "Seed Junky",
       "flowerWeeks": "9–10",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -46,7 +45,6 @@
       "type": "indica",
       "breeder": "3rd Gen Family / Terp Hogz",
       "flowerWeeks": "8–9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -55,7 +53,6 @@
       "type": "hybrid",
       "breeder": "GG Strains",
       "flowerWeeks": "8–9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -64,7 +61,6 @@
       "type": "hybrid",
       "breeder": "Seed Junky",
       "flowerWeeks": "8–9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -73,7 +69,6 @@
       "type": "hybrid",
       "breeder": "Seed Junky",
       "flowerWeeks": "8–9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -82,7 +77,6 @@
       "type": "hybrid",
       "breeder": "Crane City Cannabis",
       "flowerWeeks": "9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -91,7 +85,6 @@
       "type": "indica",
       "breeder": "Compound Genetics",
       "flowerWeeks": "8–9",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -100,7 +93,6 @@
       "type": "indica",
       "breeder": "Sensi Seeds",
       "flowerWeeks": "7–8",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -109,7 +101,6 @@
       "type": "hybrid",
       "breeder": "North Atlantic Seed Co.",
       "flowerWeeks": "8–9",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -118,7 +109,6 @@
       "type": "sativa",
       "breeder": "Humboldt Seed Co",
       "flowerWeeks": "10–11",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -127,7 +117,6 @@
       "type": "sativa",
       "breeder": "Royal Queen Seeds",
       "flowerWeeks": "10–11",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -136,7 +125,6 @@
       "type": "hybrid",
       "breeder": "Sensi Seeds",
       "flowerWeeks": "8–9",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -145,7 +133,6 @@
       "type": "hybrid",
       "breeder": "Cookies",
       "flowerWeeks": "9–10",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -163,7 +150,6 @@
       "type": "auto",
       "breeder": "Fast Buds",
       "flowerWeeks": "9–10",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -181,7 +167,6 @@
       "type": "auto",
       "breeder": "Fast Buds",
       "flowerWeeks": "9",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -190,7 +175,6 @@
       "type": "auto",
       "breeder": "Mephisto Genetics",
       "flowerWeeks": "9–11",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -199,7 +183,6 @@
       "type": "auto",
       "breeder": "Mephisto Genetics",
       "flowerWeeks": "9–11",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -208,7 +191,6 @@
       "type": "auto",
       "breeder": "Mephisto Genetics",
       "flowerWeeks": "9–11",
-      "trending": false,
       "source": "curated"
     },
     {
@@ -217,7 +199,6 @@
       "type": "auto",
       "breeder": "Mephisto Genetics",
       "flowerWeeks": "9–11",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -226,7 +207,6 @@
       "type": "auto",
       "breeder": "Night Owl Seeds",
       "flowerWeeks": "11–13",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -235,7 +215,6 @@
       "type": "auto",
       "breeder": "Atlas Seed",
       "flowerWeeks": "9–10",
-      "trending": true,
       "source": "curated"
     },
     {
@@ -244,7 +223,6 @@
       "type": "auto",
       "breeder": "Dutch Passion",
       "flowerWeeks": "10–11",
-      "trending": false,
       "source": "curated"
     }
   ]

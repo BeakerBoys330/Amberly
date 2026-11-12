@@ -106,7 +106,7 @@ Warm, welcoming, familiar-but-distinct, Apple-like. Owner rejected an earlier da
 2. Reminder notifications (Capacitor Local Notifications) — top competitor-loved feature.
 3. Wrap with Capacitor for iOS/Android (see `docs/ACTION_PLAN.md`).
 4. Backend: sharing + following are built (Supabase). Next: optional cloud backup + multi-device sync for signed-in users (keep it separate from training data: backups must NOT be used for training unless shared). `connect-src`/`img-src` in `vercel.json` are pinned to the one Supabase project (change them if the project ever moves). Sign-in has a Cloudflare Turnstile bot check (`botCheck` in cloud.js, on when `VITE_TURNSTILE_SITE_KEY` is set; Supabase verifies the token); its script loads only when the sign-in sheet opens.
-5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list.
+5. Strain DB: grow beyond 27 by re-entering facts (name, auto/photo, breeder, flower weeks) from breeder sites; no copied descriptions or images. Or let user-added strains build the list. The "Popular" badge (`trending: true`) is hand-picked on 5 strains for now; later, set it from what growers actually pick and share.
 6. Ideas from research not yet built: green-light mode, copy-forward of yesterday's log, outdoor flowering date from latitude, brand feeding presets (GH Flora, FoxFarm at ½ strength), runoff EC/pH alerts, deficiency diagnosis library.
 
 ## Verification
